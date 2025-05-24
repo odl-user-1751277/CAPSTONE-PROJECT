@@ -11,9 +11,9 @@ logging.basicConfig(level=logging.INFO)
 def configure_sidebar():
     """Configure the sidebar with navigation options"""
     if "selected_option" not in st.session_state:
-        st.session_state.selected_option = "Chat"
-    if st.sidebar.button("💬 Chat"):
-        st.session_state.selected_option = "Chat"
+        st.session_state.selected_option = "Multi-Agent"
+    # if st.sidebar.button("💬 Chat"):
+    #     st.session_state.selected_option = "Chat"
     if st.sidebar.button("🤖 Multi-Agent"):
         st.session_state.selected_option = "Multi-Agent"
         
