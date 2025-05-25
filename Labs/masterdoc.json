@@ -5,7 +5,15 @@
     "BaseURL": "https://github.com/CloudLabsAI-Azure/Capstone-Project",
     "Files": [
       {
+        "RawFilePath": "https://docs-api.cloudlabs.ai/repos/raw.githubusercontent.com/CloudLabsAI-Azure/Capstone-Project/refs/heads/main/Labs/getting-started.md",
+        "Order": 1
+      },
+      {
         "RawFilePath": "https://docs-api.cloudlabs.ai/repos/raw.githubusercontent.com/CloudLabsAI-Azure/Capstone-Project/refs/heads/main/Labs/challenge_guide.md",
+        "Order": 1
+      },
+      {
+        "RawFilePath": "https://docs-api.cloudlabs.ai/repos/raw.githubusercontent.com/CloudLabsAI-Azure/Capstone-Project/refs/heads/soln-guide/Solution-Guide/soln-guide.md",
         "Order": 1
       }
     ]
