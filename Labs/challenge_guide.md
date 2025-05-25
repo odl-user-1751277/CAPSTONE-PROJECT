@@ -12,11 +12,36 @@ In this challenge, you will create a multi-agent system that takes the user's re
 
 ---
 
+## Challenge Objectives:
+
+1. **Azure OpenAI Service Deployment:**
+
+    - Set up an Azure OpenAI Service instance with SKU size Standard `S0`.
+
+        > **Note:** Ensure the region is set to **East US**.
+
+    - Deploy it in the a new resource group named `openaiagents`.
+
+    - Obtain the necessary Azure OpenAI Key and Endpoint.
+
+1. **Deploy Azure OpenAI Models:**
+   
+    - Azure OpenAI provides a web-based portal named **Azure AI Foundry Portal** that you can use to deploy, manage, and explore models. You'll start your exploration of Azure OpenAI by using Azure AI Foundry to deploy a model.
+    
+    - Launch Azure AI Foundry Portal from the overview pane and deploy an Azure OpenAI Model, i.e., `gpt-4o`.
+
+        >- **Note:** Make sure the deployments are named **gpt-4o**.
+        >- **Note:** Ensure the Deployment Type is set to **Global Standard** and we are using **2024-11-20** for the model version.
+
+    - Fetch the **Deployment name** and the **API version** of the model.
+
+        >- **Hint:** API version can be fetched from the Target URI.
+
+
+
+
 ## Task 1 - Azure AI Foundry Model Deployment & Environment Configuration
 
-1. Navigate to Azure portal and deploy Azure AI Foundry.
-
-1. Deploy a GPT-4o model using Azure AI Foundry: https://ai.azure.com. The deployment name should be something like `gpt-4o`. This name will be needed when configuring Semantic Kernel. The deployment type should be Standard.
 
 1. Update the `.env` file with the Azure AI Foundry deployment details:
 
