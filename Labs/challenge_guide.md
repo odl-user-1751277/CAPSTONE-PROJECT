@@ -63,7 +63,7 @@ In this challenge, you will create a multi-agent system that takes the user's re
     - `ExecutionSettings` with a `TerminationStrategy` set to an instance of `ApprovalTerminationStrategy`
 1. Implement the `should_agent_terminate` method in the `ApprovalTerminationStrategy` class. The agents should terminate when the Users returns "APPROVED" in the chat history.
 
-## Task 4 - Triggering Git Push on User Approval
+## Task 3 - Triggering Git Push on User Approval
 
 Add logic so that when the user sends "APPROVED" in the chat, a Bash script is triggered to push the code written by the Software Engineer agent to a Git repository.
 
@@ -96,7 +96,7 @@ This automation ensures that once the Product Owner (or user) sends "APPROVED", 
 
 ---
 
-## Task 3 - Run the Multi-Agent Conversation and Validate Workflow
+## Task 4 - Run the Multi-Agent Conversation and Validate Workflow
 
 1. Implement the code to send a user message to the agent group using `add_chat_message` on the `AgentGroupChat` object. The message should include:
     - `AuthorRole.User` as the author
@@ -111,7 +111,7 @@ This automation ensures that once the Product Owner (or user) sends "APPROVED", 
 
 1. Run your application and provide a request to build a calculator app. Observe how the Business Analyst, Software Engineer, and Product Owner collaborate to plan, build, and approve the solution.
 
-## Task 4 - Deploy the app to Azure
+## Task 5 - Deploy the app to Azure
 ### Deploying the App to Azure Using Container Registry and Azure App Service
 
 To host your app online using Azure, follow these steps to containerize your application, push it to Azure Container Registry (ACR), and deploy it using Azure App Service:
