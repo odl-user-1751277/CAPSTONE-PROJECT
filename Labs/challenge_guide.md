@@ -31,17 +31,14 @@ In this challenge, you will create a multi-agent system that takes the user's re
     - Launch Azure AI Foundry Portal from the overview pane and deploy an Azure OpenAI Model, i.e., `gpt-4o`.
 
         >- **Note:** Make sure the deployments are named **gpt-4o**.
-        >- **Note:** Ensure the Deployment Type is set to **Global Standard** and we are using **2024-11-20** for the model version.
+        >- **Note:** Ensure the Deployment Type is set to **Global Standard** and use **2024-11-20** for the model version.
 
     - Fetch the **Deployment name** and the **API version** of the model.
 
         >- **Hint:** API version can be fetched from the Target URI.
 
 
-
-
 ## Task 1 - Azure AI Foundry Model Deployment & Environment Configuration
-
 
 1. Update the `.env` file with the Azure AI Foundry deployment details:
 
