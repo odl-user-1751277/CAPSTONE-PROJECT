@@ -113,17 +113,30 @@ This automation ensures that once the Product Owner (or user) sends "APPROVED", 
 
 To host your app online using Azure, follow these steps to containerize your application, push it to Azure Container Registry (ACR), and deploy it using Azure App Service:
 
-1. Open a terminal and use the following command to login to the azd cli:
+1. Open a terminal and sign in to the Azure Developer CLI using the following command:
 
-    ```
-    azd auth login
-    ```
-1. Use the following command to deploy the required resources on azure:
-
-    ```
+    ```bash
     azd auth login
     ```
 
+1. Deploy the required resources to Azure by running:
+
+    ```bash
+    azd up
+    ```
+
+1. When running the **azd up** command, you'll be asked to provide configuration details interactively. Provide the following values when prompted:
+
+   - **Unique Environment Name**: Enter **CapstoneEnv-<inject key="Deployment ID" enableCopy="false"/>** **(1)**.
+   - **Azure Subscription to use**: Choose the default subscription **(2)** that appears and press **Enter**.
+   - **Location Infrastructure Parameter**: Select **East US 2** **(3)** from the options and press **Enter**.
+   - **ResourceGroupName Infrastructure Parameter**: Type **CapstoneEnv-<inject key="Deployment ID" enableCopy="false"/>** **(4)** and press **Enter**.
+   - **Resource Group to use**: Select **CapstoneEnv-<inject key="Deployment ID" enableCopy="false"/>** **(5)** from the options and press **Enter**.
+
+1. Open the Azure portal and navigate to the resource group **CapstoneEnv-<inject key="Deployment ID" enableCopy="false"/>**.
+2. Locate the deployed container app resource.
+3. Copy the endpoint URL of the container app.
+4. Access the web app by visiting this endpoint in your browser and verify that the application functions as expected.
 ## Success Criteria
 
 - You have implemented the Multi-Agent Chat system that produces:
@@ -150,6 +163,7 @@ To host your app online using Azure, follow these steps to containerize your app
 - [MetaGPT](https://github.com/geekan/MetaGPT)
 - [AutoGen Multi-Agent Conversational Framework](https://microsoft.github.io/autogen/docs/Use-Cases/agent_chat/)
 - [AutoGen with Semantic Kernel](https://devblogs.microsoft.com/semantic-kernel/autogen-agents-meet-semantic-kernel/)
+- [Managing your personal access tokens](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
 
 ---
 
