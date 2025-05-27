@@ -91,7 +91,7 @@ Add logic so that when the user sends "APPROVED" in the chat, a Bash script is t
 5. In your Python code, use the `subprocess` module to call this script when "APPROVED" is detected:
 6. Ensure your environment has the necessary Git credentials configured for non-interactive pushes.
 
-This automation ensures that once the Product Owner (or user) sends "APPROVED", the latest code is automatically pushed to your Git repository.
+This automation ensures that once the user sends "APPROVED", the latest code is automatically pushed to your Git repository.
 
 ## Task 4 - Run the Multi-Agent Conversation and Validate Workflow
 
