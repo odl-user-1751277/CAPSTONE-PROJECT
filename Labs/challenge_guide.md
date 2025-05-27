@@ -2,15 +2,10 @@
 
 ## Introduction
 
-Multi-Agent Systems (MAS) consist of multiple autonomous agents, each with distinct goals, behaviors, and areas of responsibility. These agents can interact with each other, either cooperating or competing, depending on the objectives they are designed to achieve. In MAS, each agent operates independently, making decisions based on its local knowledge and the environment, but they can communicate and share information to solve complex problems collectively.
+Multi-Agent Systems (MAS) consist of multiple autonomous agents, each with distinct goals, behaviors, and areas of responsibility. These agents operate independently, making decisions based on their local knowledge and environment. However, they can also communicate and share information with one another, either cooperating or competing depending on their objectives. MAS is typically used in scenarios where tasks are distributed across multiple entities and the system benefits from decentralization. Common applications include traffic management, robotic teams, distributed AI, and networked systems where coordination is required without relying on a central controller.
 
-MAS is often used in scenarios where tasks are distributed across different entities, and the overall system benefits from decentralization. Examples include simulations of real-world systems like traffic management, robotic teams, distributed AI applications, or networked systems where agents need to coordinate actions without a central controller. MAS allows for flexibility, scalability, and adaptability in solving dynamic and complex problems where a single agent or centralized system might be less efficient or incapable of handling the complexity on its own.
+In this challenge, you will create a Multi-Agent System that accepts a user’s request and processes it through a collection of agents, each designed with a specific persona and area of expertise. The agents will individually analyze the request and contribute their responses based on their defined responsibilities. The final output will be a consolidated collection of answers from all agents, collaboratively addressing the user’s query in a way that reflects the unique perspective of each persona.
 
-## Description
-
-In this challenge, you will create a multi-agent system that takes the user's request and feeds it to a collection of agents. Each agent will have its own persona and responsibility. The final response will be a collection of answers from all agents that together will satisfy the user's request based on each persona's area of expertise.
-
----
 
 ## Challenge Objectives:
 
