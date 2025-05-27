@@ -1,4 +1,4 @@
-targetScope = 'subscription'
+targetScope = 'resourceGroup'
 
 @minLength(1)
 @maxLength(64)
@@ -8,6 +8,9 @@ param environmentName string
 @description('Primary location for all resources')
 param location string
 
+@description('Name of the resource group to deploy resources into')
+param resourceGroupName string
+
 param prefix string = 'dev'
 param uiAppExists bool = false
 
@@ -15,17 +18,11 @@ var tags = {
   'azd-env-name': environmentName
 }
 
-resource rg 'Microsoft.Resources/resourceGroups@2022-09-01' = {
-  name: 'rg-${environmentName}'
-  location: location
-  tags: tags
-}
-
-var uniqueId = uniqueString(rg.id)
+var uniqueId = uniqueString(resourceGroup().id)
 
 module acrModule './acr.bicep' = {
   name: 'acr'
-  scope: rg
+  scope: resourceGroup()
   params: {
     uniqueId: uniqueId
     prefix: prefix
@@ -35,7 +32,7 @@ module acrModule './acr.bicep' = {
 
 module aca './aca.bicep' = {
   name: 'aca'
-  scope: rg
+  scope: resourceGroup()
   params: {
     uniqueId: uniqueId
     prefix: prefix
@@ -47,5 +44,5 @@ module aca './aca.bicep' = {
 
 // These outputs are copied by azd to .azure/<env name>/.env file
 // post provision script will use these values, too
-output AZURE_RESOURCE_GROUP string = rg.name
+output AZURE_RESOURCE_GROUP string = resourceGroupName
 output AZURE_CONTAINER_REGISTRY_ENDPOINT string = acrModule.outputs.acrEndpoint
