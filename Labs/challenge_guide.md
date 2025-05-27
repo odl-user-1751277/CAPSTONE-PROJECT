@@ -95,22 +95,7 @@ Add logic so that when the user sends "APPROVED" in the chat, a Bash script is t
 2. Extract the HTML code provided by the Software Engineer agent from the chat history.
 3. Save the extracted code to a file (e.g., `index.html`).
 4. Create a Bash script (e.g., `push_to_git.sh`) that stages, commits, and pushes the file to your desired Git repository:
-
-    ```bash
-    #!/bin/bash
-    git add index.html
-    git commit -m "Add approved calculator app"
-    git push origin main
-    ```
-
 5. In your Python code, use the `subprocess` module to call this script when "APPROVED" is detected:
-
-    ```python
-    import subprocess
-
-    if approved_detected:
-        subprocess.run(["bash", "push_to_git.sh"])
-    ```
 
 6. Ensure your environment has the necessary Git credentials configured for non-interactive pushes.
 
