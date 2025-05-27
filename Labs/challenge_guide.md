@@ -84,19 +84,14 @@ In this challenge, you will create a Multi-Agent System that accepts a user’s 
 
 Add logic so that when the user sends "APPROVED" in the chat, a Bash script is triggered to push the code written by the Software Engineer agent to a Git repository.
 
-**Steps:**
-
 1. After implementing the `should_agent_terminate` method to detect "APPROVED", add a callback or post-processing step that executes when this condition is met.
 2. Extract the HTML code provided by the Software Engineer agent from the chat history.
 3. Save the extracted code to a file (e.g., `index.html`).
 4. Create a Bash script (e.g., `push_to_git.sh`) that stages, commits, and pushes the file to your desired Git repository:
 5. In your Python code, use the `subprocess` module to call this script when "APPROVED" is detected:
-
 6. Ensure your environment has the necessary Git credentials configured for non-interactive pushes.
 
 This automation ensures that once the Product Owner (or user) sends "APPROVED", the latest code is automatically pushed to your Git repository.
-
----
 
 ## Task 4 - Run the Multi-Agent Conversation and Validate Workflow
 
@@ -118,76 +113,16 @@ This automation ensures that once the Product Owner (or user) sends "APPROVED", 
 
 To host your app online using Azure, follow these steps to containerize your application, push it to Azure Container Registry (ACR), and deploy it using Azure App Service:
 
-#### 1. Containerize Your Application
+1. Open a terminal and use the following command to login to the azd cli:
 
-Create a `Dockerfile` in your project directory:
+    ```
+    azd auth login
+    ```
+1. Use the following command to deploy the required resources on azure:
 
-```dockerfile
-# Use an official Python runtime as a parent image
-FROM python:3.10-slim
-
-# Set the working directory
-WORKDIR /app
-
-# Copy the current directory contents into the container
-COPY . /app
-
-# Install any needed packages
-RUN pip install -r requirements.txt
-
-# Expose port 8000 (adjust if your app uses a different port)
-EXPOSE 8000
-
-# Run the application
-CMD ["python", "multi_agent.py"]
-```
-
-#### 2. Build and Test Your Docker Image Locally
-
-```bash
-docker build -t multi-agent-app .
-docker run -p 8000:8000 multi-agent-app
-```
-
-#### 3. Create an Azure Container Registry
-
-```bash
-az acr create --resource-group <your-resource-group> --name <your-acr-name> --sku Basic
-az acr login --name <your-acr-name>
-```
-
-#### 4. Tag and Push Your Image to ACR
-
-```bash
-docker tag multi-agent-app <your-acr-name>.azurecr.io/multi-agent-app:latest
-docker push <your-acr-name>.azurecr.io/multi-agent-app:latest
-```
-
-#### 5. Deploy to Azure App Service Using the Container Image
-
-```bash
-az appservice plan create --name <your-appservice-plan> --resource-group <your-resource-group> --is-linux --sku B1
-az webapp create --resource-group <your-resource-group> --plan <your-appservice-plan> --name <your-webapp-name> --deployment-container-image-name <your-acr-name>.azurecr.io/multi-agent-app:latest
-az webapp config container set --name <your-webapp-name> --resource-group <your-resource-group> --docker-custom-image-name <your-acr-name>.azurecr.io/multi-agent-app:latest --docker-registry-server-url https://<your-acr-name>.azurecr.io
-```
-
-#### 6. Configure Environment Variables
-
-Set your `.env` variables in Azure App Service:
-
-```bash
-az webapp config appsettings set --resource-group <your-resource-group> --name <your-webapp-name> --settings AZURE_OPENAI_CHAT_DEPLOYMENT_NAME=... AZURE_OPENAI_ENDPOINT=... AZURE_OPENAI_API_KEY=... AZURE_OPENAI_API_VERSION=...
-```
-
-#### 7. Access Your App
-
-Once deployed, your app will be accessible at `https://<your-webapp-name>.azurewebsites.net`.
-
-**References:**
-- [Quickstart: Deploy a container to Azure App Service](https://learn.microsoft.com/en-us/azure/app-service/quickstart-custom-container?tabs=python&pivots=container-linux)
-- [Azure Container Registry Documentation](https://learn.microsoft.com/en-us/azure/container-registry/)
-
----
+    ```
+    azd auth login
+    ```
 
 ## Success Criteria
 
