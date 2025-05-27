@@ -22,7 +22,7 @@ In this challenge, you will create a multi-agent system that takes the user's re
 
     - Deploy it in resource group prefixed with `openaiagents`.
 
-    - Obtain the necessary Azure OpenAI Key and Endpoint.
+    - Obtain the Azure OpenAI Key and Endpoint. 
 
 1. **Deploy Azure OpenAI Models:**
    
