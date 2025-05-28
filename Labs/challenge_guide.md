@@ -87,7 +87,7 @@ Add logic so that when the user sends "APPROVED" in the chat, a Bash script is t
 1. After implementing the `should_agent_terminate` method to detect "APPROVED", add a callback or post-processing step that executes when this condition is met.
 2. Extract the HTML code provided by the Software Engineer agent from the chat history.
 3. Save the extracted code to a file (e.g., `index.html`).
-4. Create a Bash script (e.g., `push_to_git.sh`) that stages, commits, and pushes the file to your desired Git repository:
+4. Create a Bash script (e.g., `push_to_github.sh`) that stages, commits, and pushes the file to your desired Git repository:
 5. In your Python code, use the `subprocess` module to call this script when "APPROVED" is detected:
 6. Ensure your environment has the necessary Git credentials configured for non-interactive pushes.
 
