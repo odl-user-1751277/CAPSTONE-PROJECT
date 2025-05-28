@@ -7,7 +7,7 @@ Multi-Agent Systems (MAS) consist of multiple autonomous agents, each with disti
 In this challenge, you will create a Multi-Agent System that accepts a user’s request and processes it through a collection of agents, each designed with a specific persona and area of expertise. The agents will individually analyze the request and contribute their responses based on their defined responsibilities. The final output will be a consolidated collection of answers from all agents, collaboratively addressing the user’s query in a way that reflects the unique perspective of each persona.
 
 
-## Challenge Objectives:
+## Task 1: Azure OpenAI Service and Model Deployment
 
 1. **Azure OpenAI Service Deployment:**
 
@@ -32,9 +32,6 @@ In this challenge, you will create a Multi-Agent System that accepts a user’s 
 
         >- **Hint:** API version can be fetched from the Target URI.
 
-
-## Task 1 - Azure AI Foundry Model Deployment & Environment Configuration
-
 1. Update the `.env` file with the Azure AI Foundry deployment details:
 
     ```
@@ -44,7 +41,12 @@ In this challenge, you will create a Multi-Agent System that accepts a user’s 
     AZURE_OPENAI_API_VERSION=Replace with your API version
     ```
 
----
+> **Congratulations** on completing the task! Now, it's time to validate it. Here are the steps:
+> - If you receive a success message, you can proceed to the next task.
+> - If not, carefully read the error message and retry the step, following the instructions in the lab guide. 
+> - If you need any assistance, please contact us at cloudlabs-support@spektrasystems.com. We are available 24/7 to help you out.
+
+<validation step="d6519c92-19e6-4dae-bdbe-3638f8d8db43" />
 
 ## Task 2 - Define Agent Personas and Configure Multi-Agent Chat
 
@@ -78,6 +80,7 @@ In this challenge, you will create a Multi-Agent System that accepts a user’s 
 1. Create an `AgentGroupChat` object to tie together the three agents. Pass:
     - An array of the three agents
     - `ExecutionSettings` with a `TerminationStrategy` set to an instance of `ApprovalTerminationStrategy`
+
 1. Implement the `should_agent_terminate` method in the `ApprovalTerminationStrategy` class. The agents should terminate when the Users returns "APPROVED" in the chat history.
 
 ## Task 3 - Triggering Git Push on User Approval
@@ -87,11 +90,18 @@ Add logic so that when the user sends "APPROVED" in the chat, a Bash script is t
 1. After implementing the `should_agent_terminate` method to detect "APPROVED", add a callback or post-processing step that executes when this condition is met.
 2. Extract the HTML code provided by the Software Engineer agent from the chat history.
 3. Save the extracted code to a file (e.g., `index.html`).
-4. Create a Bash script (e.g., `push_to_github.sh`) that stages, commits, and pushes the file to your desired Git repository:
+4. Create a Bash script (`push_to_github.sh`) that stages, commits, and pushes the file to your desired Git repository:
 5. In your Python code, use the `subprocess` module to call this script when "APPROVED" is detected:
 6. Ensure your environment has the necessary Git credentials configured for non-interactive pushes.
 
 This automation ensures that once the user sends "APPROVED", the latest code is automatically pushed to your Git repository.
+
+> **Congratulations** on completing the task! Now, it's time to validate it. Here are the steps:
+> - If you receive a success message, you can proceed to the next task.
+> - If not, carefully read the error message and retry the step, following the instructions in the lab guide. 
+> - If you need any assistance, please contact us at cloudlabs-support@spektrasystems.com. We are available 24/7 to help you out.
+
+<validation step="86730b76-da41-429e-9a9b-35b6ecd8bd79" />
 
 ## Task 4 - Run the Multi-Agent Conversation and Validate Workflow
 
@@ -107,6 +117,13 @@ This automation ensures that once the user sends "APPROVED", the latest code is 
     ```
 
 1. Run your application and provide a request to build a calculator app. Observe how the Business Analyst, Software Engineer, and Product Owner collaborate to plan, build, and approve the solution.
+
+> **Congratulations** on completing the task! Now, it's time to validate it. Here are the steps:
+> - If you receive a success message, you can proceed to the next task.
+> - If not, carefully read the error message and retry the step, following the instructions in the lab guide. 
+> - If you need any assistance, please contact us at cloudlabs-support@spektrasystems.com. We are available 24/7 to help you out.
+
+<validation step="cd2e41f5-e0af-43fc-97ac-3358da846e31" />
 
 ## Task 5 - Deploy the app to Azure
 ### Deploying the App to Azure Using Container Registry and Azure App Service
@@ -127,16 +144,23 @@ To host your app online using Azure, follow these steps to containerize your app
 
 1. When running the **azd up** command, you'll be asked to provide configuration details interactively. Provide the following values when prompted:
 
-   - **Unique Environment Name**: Enter **CapstoneEnv-<inject key="Deployment ID" enableCopy="false"/>** **(1)**.
-   - **Azure Subscription to use**: Choose the default subscription **(2)** that appears and press **Enter**.
+   - **Unique Environment Name**: Enter **CapstoneEnv**.
+   - **Azure Subscription to use**: Choose the default subscription that appears and press **Enter**.
    - **Location Infrastructure Parameter**: Select **East US 2** **(3)** from the options and press **Enter**.
-   - **ResourceGroupName Infrastructure Parameter**: Type **CapstoneEnv-<inject key="Deployment ID" enableCopy="false"/>** **(4)** and press **Enter**.
-   - **Resource Group to use**: Select **CapstoneEnv-<inject key="Deployment ID" enableCopy="false"/>** **(5)** from the options and press **Enter**.
+   - **ResourceGroupName Infrastructure Parameter**: Type **CapstoneEnv** and press **Enter**.
+   - **Resource Group to use**: Select **CapstoneEnv** from the options and press **Enter**.
 
-1. Open the Azure portal and navigate to the resource group **CapstoneEnv-<inject key="Deployment ID" enableCopy="false"/>**.
+1. Open the Azure portal and navigate to the resource group **CapstoneEnv**.
 1. Locate the deployed container app resource.
 1. Copy the endpoint URL of the container app.
 1. Access the web app by visiting this endpoint in your browser and verify that the application functions as expected.
+
+> **Congratulations** on completing the task! Now, it's time to validate it. Here are the steps:
+> - If you receive a success message, you can proceed to the next task.
+> - If not, carefully read the error message and retry the step, following the instructions in the lab guide. 
+> - If you need any assistance, please contact us at cloudlabs-support@spektrasystems.com. We are available 24/7 to help you out.
+
+<validation step="14625f2c-4adb-4d11-969d-74eb6be92a21" />
 
 ## Success Criteria
 
@@ -145,7 +169,7 @@ You have implemented the Multi-Agent Chat system that produces:
  - Thorough code review and approval process by User
  - Automated deployment of the application to Azure
  - Automated code push to a Git repository upon user approval
----
+
 
 ## Bonus
 
@@ -154,8 +178,6 @@ You have implemented the Multi-Agent Chat system that produces:
 - Test if the application functions as the AI described.
 - Enhance the app by asking the AI to make it responsive or add new features.
 - Experiment with modifying personas to improve results or functionality.
-
----
 
 ## Learning Resources
 
