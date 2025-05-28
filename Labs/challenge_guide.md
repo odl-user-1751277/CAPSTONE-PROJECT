@@ -118,12 +118,6 @@ This automation ensures that once the user sends "APPROVED", the latest code is 
 
 1. Run your application and provide a request to build a calculator app. Observe how the Business Analyst, Software Engineer, and Product Owner collaborate to plan, build, and approve the solution.
 
-> **Congratulations** on completing the task! Now, it's time to validate it. Here are the steps:
-> - If you receive a success message, you can proceed to the next task.
-> - If not, carefully read the error message and retry the step, following the instructions in the lab guide. 
-> - If you need any assistance, please contact us at cloudlabs-support@spektrasystems.com. We are available 24/7 to help you out.
-
-<validation step="cd2e41f5-e0af-43fc-97ac-3358da846e31" />
 
 ## Task 5 - Deploy the app to Azure
 ### Deploying the App to Azure Using Container Registry and Azure App Service
