@@ -12,7 +12,7 @@ In this challenge, you will work with a Chainlit-based conversational applicatio
 
 By the end of this lab, you will be able to:
 
-- **Smart Escalation System for Conversational Support**: Set up and test an AI-powered escalation system using Azure OpenAI, Dapr, and Logic Apps to route unresolved queries from a chat interface to a human agent.
+- **Multi-Agent Business Persona Workflow**: Experience a collaborative workflow involving three distinct personas—Software Engineer, Product Owner, and User. The Software Engineer writes and submits code, the Product Owner reviews and approves the changes, and upon approval, the solution is automatically pushed to GitHub for deployment and version control.
 
 ## Prerequisites
 
