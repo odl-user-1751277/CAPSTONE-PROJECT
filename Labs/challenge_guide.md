@@ -140,11 +140,11 @@ To host your app online using Azure, follow these steps to containerize your app
 
 ## Success Criteria
 
-- You have implemented the Multi-Agent Chat system that produces:
-    - Generation of complete source code in HTML and JavaScript for the requested application
-    - Thorough code review and approval process by User
-    - Automated deployment of the application to Azure
-    - Automated code push to a Git repository upon user approval
+You have implemented the Multi-Agent Chat system that produces:
+ - Generation of complete source code in HTML and JavaScript for the requested application
+ - Thorough code review and approval process by User
+ - Automated deployment of the application to Azure
+ - Automated code push to a Git repository upon user approval
 ---
 
 ## Bonus
