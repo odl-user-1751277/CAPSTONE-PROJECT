@@ -134,9 +134,10 @@ To host your app online using Azure, follow these steps to containerize your app
    - **Resource Group to use**: Select **CapstoneEnv-<inject key="Deployment ID" enableCopy="false"/>** **(5)** from the options and press **Enter**.
 
 1. Open the Azure portal and navigate to the resource group **CapstoneEnv-<inject key="Deployment ID" enableCopy="false"/>**.
-2. Locate the deployed container app resource.
-3. Copy the endpoint URL of the container app.
-4. Access the web app by visiting this endpoint in your browser and verify that the application functions as expected.
+1. Locate the deployed container app resource.
+1. Copy the endpoint URL of the container app.
+1. Access the web app by visiting this endpoint in your browser and verify that the application functions as expected.
+
 ## Success Criteria
 
 - You have implemented the Multi-Agent Chat system that produces:
@@ -144,7 +145,6 @@ To host your app online using Azure, follow these steps to containerize your app
     - Thorough code review and approval process by User
     - Automated deployment of the application to Azure
     - Automated code push to a Git repository upon user approval
-
 ---
 
 ## Bonus
