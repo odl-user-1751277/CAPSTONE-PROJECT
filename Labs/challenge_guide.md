@@ -7,7 +7,7 @@ Multi-Agent Systems (MAS) consist of multiple autonomous agents, each with disti
 In this challenge, you will create a Multi-Agent System that accepts a user’s request and processes it through a collection of agents, each designed with a specific persona and area of expertise. The agents will individually analyze the request and contribute their responses based on their defined responsibilities. The final output will be a consolidated collection of answers from all agents, collaboratively addressing the user’s query in a way that reflects the unique perspective of each persona.
 
 
-## Task 1: Azure OpenAI Service and Model Deployment
+## Task 1 - Azure AI Foundry Model Deployment & Environment Configuration
 
 1. **Azure OpenAI Service Deployment:**
 
