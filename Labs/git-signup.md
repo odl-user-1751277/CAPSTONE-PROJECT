@@ -35,11 +35,11 @@ Then click **"Continue"**.
 
 ### 4. Verify Your Account
 
-- Complete the puzzle to verify you're not a bot
+- Complete the puzzle to verify you're not a bot.
 
    ![](./media/git-3.png)
-- GitHub will send a verification code to your email
-- Enter the code to continue
+- GitHub will send a verification code to your email.
+- Enter the code to continue.
 
 ---
 
