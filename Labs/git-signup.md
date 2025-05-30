@@ -28,7 +28,7 @@ Use the following details:
 - **Password** :- <inject key="AzureAdUserPassword"></inject> **(2)**
 - **Username** :- odl-user-<inject key="Deployment ID" enableCopy="false"/> **(3)**
 
-Then click **"Continue" (4)**.
+   Then click **"Continue" (4)**.
 
    ![](./media/git-2.png)
 ---
