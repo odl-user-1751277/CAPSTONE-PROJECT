@@ -15,7 +15,7 @@ Go to the official GitHub website:
 
 ### 2. Start the Sign-Up Process
 
-- Click the **"Sign up"** button at the top right.
+- Click the **"Sign up" (1)** button at the top right.
 
    ![](./media/git-1.png)
 ---
@@ -24,11 +24,11 @@ Go to the official GitHub website:
 
 Use the following details:
 
-- **Email address** :- <inject key="AzureAdUserEmail"></inject>
-- **Password** :- <inject key="AzureAdUserPassword"></inject>
-- **Username** :- odl-user-
+- **Email address** :- <inject key="AzureAdUserEmail"></inject> **(1)**
+- **Password** :- <inject key="AzureAdUserPassword"></inject> **(2)**
+- **Username** :- odl-user-<inject key="Deployment ID" enableCopy="false"/> **(3)**
 
-Then click **"Continue"**.
+Then click **"Continue" (4)**.
 
    ![](./media/git-2.png)
 ---
