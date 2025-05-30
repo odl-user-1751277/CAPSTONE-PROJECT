@@ -54,7 +54,7 @@ In this challenge, you will create a Multi-Agent System that accepts a user’s 
 
 1. Open the `multi_agent.py` file. This is where you will implement all necessary code for this challenge.
 
-2. Create personas for the three agents with the following instructions:
+1. Create personas for the three agents with the following instructions:
 
     - **Business Analyst Persona**
 
@@ -74,30 +74,30 @@ In this challenge, you will create a Multi-Agent System that accepts a user’s 
         You are the Product Owner which will review the software engineer's code to ensure all user  requirements are completed. You are the guardian of quality, ensuring the final product meets all specifications. IMPORTANT: Verify that the Software Engineer has shared the HTML code using the format ```html [code] ```. This format is required for the code to be saved and pushed to GitHub. Once all client requirements are completed and the code is properly formatted, reply with 'READY FOR USER APPROVAL'. If there are missing features or formatting issues, you will need to send a request back to the SoftwareEngineer or BusinessAnalyst with details of the defect.
         ```
 
-3. Create a `ChatCompletionAgent` for each of the above personas. Each agent should have:
+1. Create a `ChatCompletionAgent` for each of the above personas. Each agent should have:
    - Instructions (the persona prompt)
    - A unique Name (letters only, no spaces or special characters)
    - A reference to a `Kernel` object
 
-4. Create an `AgentGroupChat` object to tie together the three agents. Pass:
+1. Create an `AgentGroupChat` object to tie together the three agents. Pass:
    - An array of the three agents
    - `ExecutionSettings` with a `TerminationStrategy` set to an instance of `ApprovalTerminationStrategy`
 
-5. Implement the `should_agent_terminate` method in the `ApprovalTerminationStrategy` class. The agents should terminate when the User returns **"APPROVED"** in the chat history.
+1. Implement the `should_agent_terminate` method in the `ApprovalTerminationStrategy` class. The agents should terminate when the User returns **"APPROVED"** in the chat history.
 
-6. After implementing the `should_agent_terminate` method to detect **"APPROVED"**, add a callback or post-processing step that executes when this condition is met.
+1. After implementing the `should_agent_terminate` method to detect **"APPROVED"**, add a callback or post-processing step that executes when this condition is met.
 
-7. Extract the HTML code provided by the Software Engineer agent from the chat history.
+1. Extract the HTML code provided by the Software Engineer agent from the chat history.
 
-8. Save the extracted code to a file (e.g., `index.html`).
+1. Save the extracted code to a file (e.g., `index.html`).
 
-9. Create a Bash script (`push_to_github.sh`) that stages, commits, and pushes the file to your desired Git repository.
+1. Create a Bash script (`push_to_github.sh`) that stages, commits, and pushes the file to your desired Git repository.
 
-10. In your Python code, use the `subprocess` module to call this script when **"APPROVED"** is detected.
+1. In your Python code, use the `subprocess` module to call this script when **"APPROVED"** is detected.
 
-11. Ensure your environment has the necessary Git credentials configured for non-interactive pushes.
+1. Ensure your environment has the necessary Git credentials configured for non-interactive pushes.
 
-This automation ensures that once the user sends "APPROVED", the latest code is automatically pushed to your Git repository.
+   This automation ensures that once the user sends "APPROVED", the latest code is automatically pushed to your Git repository.
 
 > **Congratulations** on completing the task! Now, it's time to validate it. Here are the steps:
 > - If you receive a success message, you can proceed to the next task.
