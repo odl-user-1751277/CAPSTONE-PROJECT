@@ -52,7 +52,7 @@ In this challenge, you will create a Multi-Agent System that accepts a user’s 
 
 1. Open **VS Code** on your Lab VM. Then, open the **CAPSTONE-PROJECT** folder in VS Code from the path `C:\LabFiles\`
 
-1. Open the `multi_agent.py` file. This is where you will implement all necessary code for this challenge.
+1. Open the `src>multi_agent.py` file. This is where you will implement all necessary code for this challenge.
 
 1. Create personas for the three agents with the following instructions:
 
