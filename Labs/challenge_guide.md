@@ -50,6 +50,8 @@ In this challenge, you will create a Multi-Agent System that accepts a user’s 
 
 ## Task 2 - Configure Multi-Agent Workflow and Automate Code Push on Approval
 
+1. Open **VS Code** on your Lab VM. Then, open the **CAPSTONE-PROJECT** folder in VS Code from the path **C:\LabFiles\\**
+
 1. Open the `multi_agent.py` file. This is where you will implement all necessary code for this challenge.
 
 2. Create personas for the three agents with the following instructions:
