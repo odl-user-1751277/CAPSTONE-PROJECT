@@ -516,7 +516,7 @@ async def execute_git_push_with_script():
     return result.returncode == 0
 
 # --- Enhanced Multi-Agent Workflow ---
-async def run_multi_agent_workflow(user_input: str):
+async def run_multi_agent(user_input: str):
     print("=" * 60)
     print("🚀 MULTI-AGENT WEB DEVELOPMENT WORKFLOW")
     print("=" * 60)
@@ -655,6 +655,15 @@ async def run_multi_agent_workflow(user_input: str):
     print("🎉 MULTI-AGENT WORKFLOW COMPLETED")
     print("=" * 60)
 
+    # Collect all chat messages (for Streamlit) before returning
+    streamlit_messages = []
+    for m in chat.history:
+        streamlit_messages.append({
+            "role": getattr(m, 'name', getattr(m, 'role', 'assistant')),
+            "content": getattr(m, 'content', str(m))
+        })
+    return streamlit_messages    
+
 # --- Main execution ---
 async def main():
     """Main entry point with user input handling."""
@@ -671,7 +680,7 @@ async def main():
             print("❌ No request provided. Exiting...")
             return
             
-        await run_multi_agent_workflow(user_request)
+        await run_multi_agent(user_request)
         
     except KeyboardInterrupt:
         print("\n🛑 Workflow interrupted by user")
