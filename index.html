@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Calculator</title>
+  <title>Calculator App</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -12,159 +12,128 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
-      background-color: #f9f9f9;
+      height: 100vh;
+      background: #f4f4f9;
     }
+
     .calculator {
-      background: #fff;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
       width: 320px;
-      max-width: 100%;
+      background: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
     }
+
     .display {
-      font-size: 2rem;
+      font-size: 2.5rem;
       padding: 20px;
-      background: #eaeaea;
       text-align: right;
-      border-bottom: 1px solid #ccc;
-      color: #333;
-      min-height: 60px;
-      word-wrap: break-word;
+      background: #1f1f1f;
+      color: #ffffff;
     }
+
     .buttons {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 1px;
-      background: #ccc;
     }
+
     button {
       font-size: 1.2rem;
       padding: 20px;
-      border: none;
-      background: #f9f9f9;
+      box-sizing: border-box;
+      border: 1px solid #e7e7e7;
+      background: #f7f7f7;
+      color: #333333;
       cursor: pointer;
+      outline: none;
       transition: background-color 0.2s;
     }
-    button:hover {
-      background: #e7e7e7;
+
+    button:active {
+      background: #d7d7d7;
     }
-    button.orange {
-      background: #ff9500;
-      color: #fff;
+
+    button.operation {
+      background: #ffc107;
+      color: #ffffff;
     }
-    button.orange:hover {
-      background: #e08500;
+
+    button.operation:active {
+      background: #e0a806;
     }
+
     button.clear {
-      background: #f44336;
-      color: #fff;
+      background: #dc3545;
+      color: #ffffff;
     }
-    button.clear:hover {
-      background: #d3352c;
+
+    button.clear:active {
+      background: #b02a37;
+    }
+
+    @media (max-width: 400px) {
+      .calculator {
+        width: 90%;
+      }
     }
   </style>
 </head>
 <body>
   <div class="calculator">
-    <div id="display" class="display">0</div>
+    <div class="display" id="display">0</div>
     <div class="buttons">
-      <button class="clear" onclick="clearAll()">AC</button>
-      <button onclick="clearEntry()">CE</button>
-      <button onclick="appendOperator('/')">÷</button>
-      <button onclick="appendOperator('*')">×</button>
-      <button onclick="appendNumber(7)">7</button>
-      <button onclick="appendNumber(8)">8</button>
-      <button onclick="appendNumber(9)">9</button>
-      <button onclick="appendOperator('-')">−</button>
-      <button onclick="appendNumber(4)">4</button>
-      <button onclick="appendNumber(5)">5</button>
-      <button onclick="appendNumber(6)">6</button>
-      <button onclick="appendOperator('+')">+</button>
-      <button onclick="appendNumber(1)">1</button>
-      <button onclick="appendNumber(2)">2</button>
-      <button onclick="appendNumber(3)">3</button>
-      <button rowspan="2" class="orange" onclick="calculate()">=</button>
-      <button colspan="2" onclick="appendNumber(0)">0</button>
-      <button onclick="appendDecimal()">.</button>
+      <button onclick="clearDisplay()" class="clear">C</button>
+      <button onclick="appendValue('%')">%</button>
+      <button onclick="deleteLast()">←</button>
+      <button onclick="appendValue('/')">÷</button>
+      <button onclick="appendValue('7')">7</button>
+      <button onclick="appendValue('8')">8</button>
+      <button onclick="appendValue('9')">9</button>
+      <button onclick="appendValue('*')" class="operation">×</button>
+      <button onclick="appendValue('4')">4</button>
+      <button onclick="appendValue('5')">5</button>
+      <button onclick="appendValue('6')">6</button>
+      <button onclick="appendValue('-')" class="operation">-</button>
+      <button onclick="appendValue('1')">1</button>
+      <button onclick="appendValue('2')">2</button>
+      <button onclick="appendValue('3')">3</button>
+      <button onclick="appendValue('+')" class="operation">+</button>
+      <button onclick="appendValue('0')" style="grid-column: span 2;">0</button>
+      <button onclick="appendValue('.')">.</button>
+      <button onclick="calculateResult()" class="operation">=</button>
     </div>
   </div>
+
   <script>
-    let currentInput = "0";
-    let previousInput = "";
-    let operator = "";
-    
-    const display = document.getElementById("display");
-    
-    function updateDisplay() {
-      display.textContent = currentInput;
+    const display = document.getElementById('display');
+
+    function clearDisplay() {
+      display.textContent = '0';
     }
-    
-    function appendNumber(number) {
-      if (currentInput === "0")
-        currentInput = number.toString();
-      else
-        currentInput += number.toString();
-      updateDisplay();
-    }
-    
-    function appendOperator(op) {
-      if (operator) calculate();
-      operator = op;
-      previousInput = currentInput;
-      currentInput = "0";
-    }
-    
-    function appendDecimal() {
-      if (!currentInput.includes(".")) currentInput += ".";
-      updateDisplay();
-    }
-    
-    function clearAll() {
-      currentInput = "0";
-      previousInput = "";
-      operator = "";
-      updateDisplay();
-    }
-    
-    function clearEntry() {
-      currentInput = "0";
-      updateDisplay();
-    }
-    
-    function calculate() {
-      let result;
-      const prev = parseFloat(previousInput);
-      const curr = parseFloat(currentInput);
-      
-      if (isNaN(prev) || isNaN(curr)) return;
-      
-      switch (operator) {
-        case "+":
-          result = prev + curr;
-          break;
-        case "-":
-          result = prev - curr;
-          break;
-        case "*":
-          result = prev * curr;
-          break;
-        case "/":
-          if (curr === 0) {
-            result = "Error";
-            break;
-          }
-          result = prev / curr;
-          break;
-        default:
-          return;
+
+    function deleteLast() {
+      if (display.textContent.length === 1 || display.textContent === 'Error') {
+        display.textContent = '0';
+      } else {
+        display.textContent = display.textContent.slice(0, -1);
       }
-      
-      currentInput = result.toString();
-      operator = "";
-      previousInput = "";
-      updateDisplay();
+    }
+
+    function appendValue(value) {
+      if (display.textContent === '0' || display.textContent === 'Error') {
+        display.textContent = value;
+      } else {
+        display.textContent += value;
+      }
+    }
+
+    function calculateResult() {
+      try {
+        // Evaluate the mathematical expression from display
+        display.textContent = eval(display.textContent.replace('×', '*').replace('÷', '/'));
+      } catch (error) {
+        display.textContent = 'Error';
+      }
     }
   </script>
 </body>
