@@ -25,7 +25,7 @@ from semantic_kernel.functions.kernel_arguments import KernelArguments
 load_dotenv()
 
 # DEV TOGGLE - Set to False to suppress Git diagnostic messages
-DEV_MODE = True
+DEV_MODE = False
 # ROOT_TOGGLE = True means output to project root, False means UI folder
 ROOT_TOGGLE = True
 
@@ -35,7 +35,9 @@ def find_git_root(path: Path) -> Path:
     for parent in [current] + list(current.parents):
         if (parent / ".git").exists():
             return parent
-    raise RuntimeError("No .git directory found!")
+    # FALLBACK: If no .git found (like in Azure container), use current directory
+    print("Warning: No .git directory found (normal in Azure deployment), using current directory")
+    return current
 PROJECT_ROOT = find_git_root(Path(__file__))
 print(">>> REAL Project Root:", PROJECT_ROOT)
 SCRIPT_IN_ROOT = PROJECT_ROOT / "push_to_github.sh"
@@ -279,9 +281,11 @@ async def execute_git_push():
         # Check if we're in a git repository
         git_dir = PROJECT_ROOT / ".git"
         if not git_dir.exists():
-            print(f"❌ Error: Not in a Git repository at {PROJECT_ROOT}")
+            print(f"ℹ️ Note: Not in a Git repository (normal in Azure deployment)")
+            print(f"📄 HTML file will be saved to: {HTML_OUTPUT_FILE}")
+            # In Azure deployment, we can't push to Git, but we can still save the file
             os.chdir(original_dir)
-            return False
+            return True  # Return success since file saving is the primary goal
             
         # Check if index.html exists in project root
             OUTPUT_FILE = HTML_OUTPUT_FILE  # Use the toggle-selected file as your working output
@@ -497,6 +501,14 @@ async def execute_git_push_with_script():
     # print("UI script exists:", SCRIPT_IN_UI.exists())
 
     print(f"🚀 Executing push script: {PUSH_SCRIPT}")
+    
+    # Debug: Show if GitHub PAT is available for Azure authentication
+    github_pat = os.getenv("GITHUB_PAT")
+    github_username = os.getenv("GITHUB_USERNAME")
+    if github_pat and github_username:
+        print(f"🔐 GitHub PAT authentication available for user: {github_username}")
+    else:
+        print("⚠️ No GitHub PAT found - using existing Git credentials")
 
     result = subprocess.run(
         [git_bash, str(PUSH_SCRIPT)],
@@ -626,6 +638,7 @@ async def run_multi_agent(user_input: str):
         for m in chat.history[-5:]
     )
     if approval_in_history:
+        print("🎯 ProductOwner says project is ready!")
         print("Type 'APPROVED' to finalize and push to GitHub, or anything else to exit:")
         user_approval = input().strip()
         if user_approval.upper() == "APPROVED":
@@ -640,11 +653,9 @@ async def run_multi_agent(user_input: str):
             if html_code:
                 HTML_OUTPUT_FILE.write_text(html_code, encoding="utf-8")
                 print(f"💾 Saved HTML to: {HTML_OUTPUT_FILE.resolve()}")
-                git_response = input("Do you want to push to GitHub? (y/N): ").strip().lower()
-                if git_response in ['y', 'yes']:
-                    await execute_git_push_with_script()
-                else:
-                    print("📝 Git push skipped by user.")
+                
+                print("🚀 Pushing to GitHub...")
+                await execute_git_push_with_script()
             else:
                 print("❌ No valid HTML code found.")
         else:
