@@ -7,131 +7,131 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
             margin: 0;
+            padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
+            background-color: #f4f4f9;
         }
-
         .calculator {
-            width: 300px;
-            background-color: #fff;
+            background: #fff;
             border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            width: 320px;
             padding: 20px;
         }
-
         .display {
-            width: 100%;
-            height: 50px;
-            background-color: #e6e6e6;
-            border: none;
-            border-radius: 5px;
-            font-size: 24px;
             text-align: right;
-            padding: 5px 10px;
+            font-size: 2rem;
+            padding: 10px;
+            background: #f9f9f9;
+            border: 1px solid #ccc;
             margin-bottom: 20px;
-            box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.1);
+            height: 60px;
+            border-radius: 5px;
+            overflow: hidden;
+            white-space: nowrap;
         }
-
         .buttons {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 10px;
         }
-
         button {
-            font-size: 18px;
-            padding: 10px;
+            height: 60px;
+            font-size: 1.2rem;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            background-color: #007bff;
-            color: #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            background: #007BFF;
+            color: white;
+            transition: background 0.3s;
         }
-
         button:hover {
-            background-color: #0056b3;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+            background: #0056b3;
         }
-
-        button.operation {
-            background-color: #28a745;
+        .button-span-2 {
+            grid-column: span 2;
         }
-
-        button.operation:hover {
-            background-color: #1e7d33;
+        .button-clear {
+            background: #dc3545;
         }
-
-        button.clear {
-            background-color: #dc3545;
-        }
-
-        button.clear:hover {
-            background-color: #a71d2a;
-        }
-
-        button.equals {
-            background-color: #ffc107;
-        }
-
-        button.equals:hover {
-            background-color: #d39e00;
+        .button-clear:hover {
+            background: #a71d2a;
         }
     </style>
 </head>
 <body>
     <div class="calculator">
-        <input type="text" id="display" class="display" disabled>
+        <div id="display" class="display">0</div>
         <div class="buttons">
+            <button onclick="clearDisplay()" class="button-clear">AC</button>
+            <button onclick="deleteLast()">DEL</button>
+            <button onclick="appendOperator('%')">%</button>
+            <button onclick="appendOperator('/')">/</button>
             <button onclick="appendNumber('7')">7</button>
             <button onclick="appendNumber('8')">8</button>
             <button onclick="appendNumber('9')">9</button>
-            <button class="operation" onclick="appendOperation('/')">÷</button>
-
+            <button onclick="appendOperator('*')">*</button>
             <button onclick="appendNumber('4')">4</button>
             <button onclick="appendNumber('5')">5</button>
             <button onclick="appendNumber('6')">6</button>
-            <button class="operation" onclick="appendOperation('*')">×</button>
-
+            <button onclick="appendOperator('-')">-</button>
             <button onclick="appendNumber('1')">1</button>
             <button onclick="appendNumber('2')">2</button>
             <button onclick="appendNumber('3')">3</button>
-            <button class="operation" onclick="appendOperation('-')">-</button>
-
-            <button onclick="appendNumber('0')">0</button>
+            <button onclick="appendOperator('+')">+</button>
+            <button onclick="appendNumber('0')" class="button-span-2">0</button>
             <button onclick="appendNumber('.')">.</button>
-            <button class="clear" onclick="clearDisplay()">AC</button>
-            <button class="operation" onclick="appendOperation('+')">+</button>
-
-            <button class="equals" onclick="calculateResult()">=</button>
+            <button onclick="calculate()">=</button>
         </div>
     </div>
-
     <script>
         const display = document.getElementById('display');
-
-        function appendNumber(number) {
-            display.value += number;
-        }
-
-        function appendOperation(operation) {
-            display.value += ` ${operation} `;
-        }
+        let currentInput = '';
+        let resetDisplay = false;
 
         function clearDisplay() {
-            display.value = '';
+            currentInput = '';
+            display.textContent = '0';
+            resetDisplay = false;
         }
 
-        function calculateResult() {
+        function deleteLast() {
+            currentInput = currentInput.slice(0, -1);
+            display.textContent = currentInput || '0';
+        }
+
+        function appendNumber(number) {
+            if (resetDisplay) {
+                currentInput = '';
+                resetDisplay = false;
+            }
+            currentInput += number;
+            display.textContent = currentInput;
+        }
+
+        function appendOperator(operator) {
+            if (resetDisplay) resetDisplay = false;
+
+            if (['+', '-', '*', '/', '%'].includes(currentInput.slice(-1))) {
+                currentInput = currentInput.slice(0, -1); // Replace last operator
+            }
+            currentInput += operator;
+            display.textContent = currentInput;
+        }
+
+        function calculate() {
             try {
-                display.value = eval(display.value.replace(/×/g, '*').replace(/÷/g, '/'));
+                currentInput = eval(currentInput).toString();
+                display.textContent = currentInput;
+                resetDisplay = true; // Flag to reset on next input
             } catch {
-                display.value = 'Error';
+                display.textContent = 'Error';
+                currentInput = '';
+                resetDisplay = true;
             }
         }
     </script>
