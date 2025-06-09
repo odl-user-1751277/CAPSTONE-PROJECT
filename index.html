@@ -3,156 +3,168 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Responsive Calculator</title>
+    <title>Calculator App</title>
     <style>
-        :root {
-            --btn-bg: #f4f4f4;
-            --btn-bg-hover: #e2e2e2;
-            --btn-text: #333;
-            --btn-accent: #ff5722;
-            --btn-accent-hover: #e64a19;
-            --bg: #fdfdfd;
-            --border-radius: 8px;
-            --font-family: Arial, sans-serif;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: var(--font-family);
-            background-color: var(--bg);
+            font-family: Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
+            background-color: #f4f4f9;
         }
 
         .calculator {
-            width: 90%;
-            max-width: 400px;
-            background: white;
-            border-radius: var(--border-radius);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            overflow: hidden;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 350px;
+            width: 100%;
         }
 
         .display {
-            background: var(--btn-accent);
-            color: white;
-            padding: 20px;
-            font-size: 2rem;
+            width: 100%;
+            height: 50px;
+            background: #efefef;
+            border: none;
+            font-size: 1.5rem;
             text-align: right;
-            word-wrap: break-word;
-            min-height: 50px;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
         }
 
         .buttons {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 1px;
+            gap: 10px;
         }
 
         .button {
-            background-color: var(--btn-bg);
-            color: var(--btn-text);
+            background: #007bff;
+            color: white;
+            font-size: 1.2rem;
             border: none;
-            font-size: 1.25rem;
-            padding: 20px;
+            border-radius: 5px;
+            padding: 10px;
+            text-align: center;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: background 0.3s;
         }
 
         .button:hover {
-            background-color: var(--btn-bg-hover);
+            background: #0056b3;
         }
 
-        .button.accent {
-            background-color: var(--btn-accent);
-            color: white;
+        .button.operator {
+            background: #28a745;
         }
 
-        .button.accent:hover {
-            background-color: var(--btn-accent-hover);
+        .button.operator:hover {
+            background: #1c7c33;
         }
 
-        .button.large {
+        .button.clear {
+            background: #dc3545;
+        }
+
+        .button.clear:hover {
+            background: #a71d2a;
+        }
+
+        .button.zero {
             grid-column: span 2;
-        }
-
-        @media (max-width: 500px) {
-            .display {
-                font-size: 1.5rem;
-                padding: 15px;
-            }
-
-            .button {
-                font-size: 1rem;
-                padding: 15px;
-            }
         }
     </style>
 </head>
 <body>
     <div class="calculator">
-        <div class="display" id="display">0</div>
+        <input type="text" id="display" class="display" disabled />
         <div class="buttons">
-            <button class="button" onclick="clearDisplay()">C</button>
-            <button class="button" onclick="deleteLast()">DEL</button>
-            <button class="button" onclick="append('%')">%</button>
-            <button class="button accent" onclick="append('/')">/</button>
-
-            <button class="button" onclick="append('7')">7</button>
-            <button class="button" onclick="append('8')">8</button>
-            <button class="button" onclick="append('9')">9</button>
-            <button class="button accent" onclick="append('*')">*</button>
-
-            <button class="button" onclick="append('4')">4</button>
-            <button class="button" onclick="append('5')">5</button>
-            <button class="button" onclick="append('6')">6</button>
-            <button class="button accent" onclick="append('-')">-</button>
-
-            <button class="button" onclick="append('1')">1</button>
-            <button class="button" onclick="append('2')">2</button>
-            <button class="button" onclick="append('3')">3</button>
-            <button class="button accent" onclick="append('+')">+</button>
-
-            <button class="button large" onclick="append('0')">0</button>
-            <button class="button" onclick="append('.')">.</button>
-            <button class="button accent" onclick="calculate()">=</button>
+            <button class="button" onclick="appendNumber('7')">7</button>
+            <button class="button" onclick="appendNumber('8')">8</button>
+            <button class="button" onclick="appendNumber('9')">9</button>
+            <button class="button operator" onclick="chooseOperator('/')">÷</button>
+            <button class="button" onclick="appendNumber('4')">4</button>
+            <button class="button" onclick="appendNumber('5')">5</button>
+            <button class="button" onclick="appendNumber('6')">6</button>
+            <button class="button operator" onclick="chooseOperator('*')">×</button>
+            <button class="button" onclick="appendNumber('1')">1</button>
+            <button class="button" onclick="appendNumber('2')">2</button>
+            <button class="button" onclick="appendNumber('3')">3</button>
+            <button class="button operator" onclick="chooseOperator('-')">−</button>
+            <button class="button zero" onclick="appendNumber('0')">0</button>
+            <button class="button" onclick="appendNumber('.')">.</button>
+            <button class="button operator" onclick="chooseOperator('+')">+</button>
+            <button class="button operator" onclick="calculate()">=</button>
+            <button class="button clear" onclick="clearDisplay()">C</button>
         </div>
     </div>
 
     <script>
-        const display = document.getElementById('display');
+        let currentOperand = '';
+        let previousOperand = '';
+        let operator = null;
 
-        function clearDisplay() {
-            display.textContent = '0';
+        function appendNumber(number) {
+            if (number === '.' && currentOperand.includes('.')) return;
+            currentOperand += number;
+            updateDisplay();
         }
 
-        function deleteLast() {
-            display.textContent = display.textContent.slice(0, -1) || '0';
+        function updateDisplay() {
+            const display = document.getElementById('display');
+            display.value = currentOperand || '0';
         }
 
-        function append(value) {
-            if (display.textContent === '0' && value !== '.') {
-                display.textContent = value;
-            } else {
-                display.textContent += value;
+        function chooseOperator(op) {
+            if (currentOperand === '') return;
+            if (previousOperand !== '') {
+                calculate();
             }
+            operator = op;
+            previousOperand = currentOperand;
+            currentOperand = '';
         }
 
         function calculate() {
-            try {
-                const result = eval(display.textContent);
-                display.textContent = result % 1 === 0 ? result : result.toFixed(2);
-            } catch (error) {
-                display.textContent = 'Error';
+            let result;
+            const prev = parseFloat(previousOperand);
+            const current = parseFloat(currentOperand);
+
+            if (isNaN(prev) || isNaN(current)) return;
+
+            switch (operator) {
+                case '+':
+                    result = prev + current;
+                    break;
+                case '-':
+                    result = prev - current;
+                    break;
+                case '*':
+                    result = prev * current;
+                    break;
+                case '/':
+                    result = current === 0 ? 'Error' : prev / current;
+                    break;
+                default:
+                    return;
             }
+
+            currentOperand = result.toString();
+            previousOperand = '';
+            operator = null;
+            updateDisplay();
+        }
+
+        function clearDisplay() {
+            currentOperand = '';
+            previousOperand = '';
+            operator = null;
+            updateDisplay();
         }
     </script>
 </body>
