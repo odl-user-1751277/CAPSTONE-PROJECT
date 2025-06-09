@@ -1,9 +1,33 @@
 #!/bin/bash
 # push_to_github.sh - Looks for index.html in root or src/ui/, stages, commits, pushes
+# Uses GitHub PAT for authentication in Azure Container Apps
 
 set -e  # Exit on any error
 
 echo "🚀 Starting Git push process..."
+
+# Load environment variables for Azure deployment
+if [ -f ".env" ]; then
+    export $(cat .env | grep -v '^#' | xargs)
+    echo "✅ Loaded environment variables from .env"
+fi
+
+# Configure Git with PAT for Azure Container Apps authentication
+if [ ! -z "$GITHUB_PAT" ] && [ ! -z "$GITHUB_USERNAME" ] && [ ! -z "$GIT_USER_EMAIL" ]; then
+    echo "🔐 Configuring Git authentication with PAT..."
+    git config --global user.name "$GITHUB_USERNAME"
+    git config --global user.email "$GIT_USER_EMAIL"
+    
+    # Set up remote URL with PAT authentication
+    if [ ! -z "$GITHUB_REPO_URL" ]; then
+        # Extract repo info from URL
+        REPO_URL_WITH_PAT=$(echo "$GITHUB_REPO_URL" | sed "s|https://github.com|https://$GITHUB_PAT@github.com|")
+        git remote set-url origin "$REPO_URL_WITH_PAT"
+        echo "✅ Git remote configured with PAT authentication"
+    fi
+else
+    echo "⚠️ GitHub PAT or credentials not found in .env - using existing Git config"
+fi
 
 # Set default and fallback paths
 HTML_ROOT="index.html"
