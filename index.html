@@ -5,138 +5,148 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculator App</title>
     <style>
+        /* General Reset */
         body {
+            margin: 0;
             font-family: Arial, sans-serif;
+            background-color: #f3f4f6;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            background-color: #f4f4f9;
+            height: 100vh;
         }
 
-        .calculator {
-            background: #fff;
-            padding: 20px;
+        #calculator {
+            width: 320px;
+            background-color: #ffffff;
             border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            max-width: 350px;
-            width: 100%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
         }
 
-        .display {
-            width: 100%;
-            height: 50px;
-            background: #efefef;
-            border: none;
-            font-size: 1.5rem;
+        #display {
+            height: 80px;
+            background-color: #212529;
+            color: #ffffff;
             text-align: right;
-            border-radius: 5px;
-            padding: 10px;
-            margin-bottom: 20px;
+            padding: 20px;
+            font-size: 1.5rem;
             box-sizing: border-box;
         }
 
         .buttons {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
+            gap: 1px;
+            background-color: #ced4da;
         }
 
         .button {
-            background: #007bff;
-            color: white;
-            font-size: 1.2rem;
+            background-color: #ffffff;
             border: none;
-            border-radius: 5px;
-            padding: 10px;
-            text-align: center;
+            font-size: 1.2rem;
+            padding: 20px;
             cursor: pointer;
-            transition: background 0.3s;
         }
 
-        .button:hover {
-            background: #0056b3;
+        .button:active {
+            background-color: #adb5bd;
         }
 
         .button.operator {
-            background: #28a745;
+            background-color: #ffa94d;
+            color: #ffffff;
         }
 
-        .button.operator:hover {
-            background: #1c7c33;
+        .button.operator:active {
+            background-color: #fd7e14;
+        }
+
+        .button.equal {
+            background-color: #40c057;
+            color: #ffffff;
+            grid-column: span 2;
+        }
+
+        .button.equal:active {
+            background-color: #37b24d;
         }
 
         .button.clear {
-            background: #dc3545;
-        }
-
-        .button.clear:hover {
-            background: #a71d2a;
-        }
-
-        .button.zero {
+            background-color: #e03131;
+            color: #ffffff;
             grid-column: span 2;
+        }
+
+        .button.clear:active {
+            background-color: #c92a2a;
         }
     </style>
 </head>
 <body>
-    <div class="calculator">
-        <input type="text" id="display" class="display" disabled />
+    <div id="calculator">
+        <div id="display">0</div>
         <div class="buttons">
-            <button class="button" onclick="appendNumber('7')">7</button>
-            <button class="button" onclick="appendNumber('8')">8</button>
-            <button class="button" onclick="appendNumber('9')">9</button>
-            <button class="button operator" onclick="chooseOperator('/')">÷</button>
-            <button class="button" onclick="appendNumber('4')">4</button>
-            <button class="button" onclick="appendNumber('5')">5</button>
-            <button class="button" onclick="appendNumber('6')">6</button>
-            <button class="button operator" onclick="chooseOperator('*')">×</button>
-            <button class="button" onclick="appendNumber('1')">1</button>
-            <button class="button" onclick="appendNumber('2')">2</button>
-            <button class="button" onclick="appendNumber('3')">3</button>
-            <button class="button operator" onclick="chooseOperator('-')">−</button>
-            <button class="button zero" onclick="appendNumber('0')">0</button>
-            <button class="button" onclick="appendNumber('.')">.</button>
-            <button class="button operator" onclick="chooseOperator('+')">+</button>
-            <button class="button operator" onclick="calculate()">=</button>
             <button class="button clear" onclick="clearDisplay()">C</button>
+            <button class="button" onclick="appendValue('±')">±</button>
+            <button class="button" onclick="appendValue('%')">%</button>
+            <button class="button operator" onclick="setOperator('/')">÷</button>
+
+            <button class="button" onclick="appendValue('7')">7</button>
+            <button class="button" onclick="appendValue('8')">8</button>
+            <button class="button" onclick="appendValue('9')">9</button>
+            <button class="button operator" onclick="setOperator('*')">×</button>
+
+            <button class="button" onclick="appendValue('4')">4</button>
+            <button class="button" onclick="appendValue('5')">5</button>
+            <button class="button" onclick="appendValue('6')">6</button>
+            <button class="button operator" onclick="setOperator('-')">−</button>
+
+            <button class="button" onclick="appendValue('1')">1</button>
+            <button class="button" onclick="appendValue('2')">2</button>
+            <button class="button" onclick="appendValue('3')">3</button>
+            <button class="button operator" onclick="setOperator('+')">+</button>
+
+            <button class="button" onclick="appendValue('0')" style="grid-column: span 2;">0</button>
+            <button class="button" onclick="appendValue('.')">.</button>
+            <button class="button equal" onclick="calculateResult()">=</button>
         </div>
     </div>
-
     <script>
         let currentOperand = '';
         let previousOperand = '';
         let operator = null;
 
-        function appendNumber(number) {
-            if (number === '.' && currentOperand.includes('.')) return;
-            currentOperand += number;
+        const displayElement = document.getElementById('display');
+
+        function updateDisplay() {
+            displayElement.textContent = currentOperand || '0';
+        }
+
+        function appendValue(value) {
+            if (value === '.' && currentOperand.includes('.')) return;
+            currentOperand += value;
             updateDisplay();
         }
 
-        function updateDisplay() {
-            const display = document.getElementById('display');
-            display.value = currentOperand || '0';
-        }
-
-        function chooseOperator(op) {
+        function setOperator(op) {
             if (currentOperand === '') return;
             if (previousOperand !== '') {
-                calculate();
+                calculateResult();
             }
             operator = op;
             previousOperand = currentOperand;
             currentOperand = '';
         }
 
-        function calculate() {
-            let result;
+        function calculateResult() {
+            if (operator === null || currentOperand === '' || previousOperand === '') return;
             const prev = parseFloat(previousOperand);
             const current = parseFloat(currentOperand);
 
             if (isNaN(prev) || isNaN(current)) return;
 
+            let result;
             switch (operator) {
                 case '+':
                     result = prev + current;
@@ -155,8 +165,8 @@
             }
 
             currentOperand = result.toString();
-            previousOperand = '';
             operator = null;
+            previousOperand = '';
             updateDisplay();
         }
 
