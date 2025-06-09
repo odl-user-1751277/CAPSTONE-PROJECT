@@ -3,137 +3,157 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculator App</title>
+    <title>Responsive Calculator</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
+        :root {
+            --btn-bg: #f4f4f4;
+            --btn-bg-hover: #e2e2e2;
+            --btn-text: #333;
+            --btn-accent: #ff5722;
+            --btn-accent-hover: #e64a19;
+            --bg: #fdfdfd;
+            --border-radius: 8px;
+            --font-family: Arial, sans-serif;
+        }
+
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg);
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #f4f4f4;
+            margin: 0;
         }
 
-        #calculator {
-            width: 320px;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        .calculator {
+            width: 90%;
+            max-width: 400px;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
         }
 
-        #display {
-            text-align: right;
+        .display {
+            background: var(--btn-accent);
+            color: white;
             padding: 20px;
-            font-size: 28px;
-            border-top-left-radius: 8px;
-            border-top-right-radius: 8px;
-            color: #333;
-            height: 70px;
-            background-color: #f8f8f8;
-            border-bottom: 1px solid #ddd;
+            font-size: 2rem;
+            text-align: right;
+            word-wrap: break-word;
+            min-height: 50px;
         }
 
         .buttons {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
+            gap: 1px;
         }
 
         .button {
-            font-size: 20px;
-            border: 1px solid #ddd;
+            background-color: var(--btn-bg);
+            color: var(--btn-text);
+            border: none;
+            font-size: 1.25rem;
             padding: 20px;
             cursor: pointer;
-            text-align: center;
-            background: #fff;
-            color: #333;
-            transition: background 0.3s;
+            transition: background-color 0.3s;
         }
 
         .button:hover {
-            background: #f0f0f0;
+            background-color: var(--btn-bg-hover);
         }
 
-        .button.action {
-            background: #f9f9f9;
-        }
-
-        .highlight {
-            background-color: #007bff;
+        .button.accent {
+            background-color: var(--btn-accent);
             color: white;
         }
 
-        .button.zero {
+        .button.accent:hover {
+            background-color: var(--btn-accent-hover);
+        }
+
+        .button.large {
             grid-column: span 2;
         }
 
-        @media (max-width: 600px) {
-            #calculator {
-                width: 90%;
+        @media (max-width: 500px) {
+            .display {
+                font-size: 1.5rem;
+                padding: 15px;
+            }
+
+            .button {
+                font-size: 1rem;
+                padding: 15px;
             }
         }
     </style>
 </head>
 <body>
-    <div id="calculator">
-        <div id="display">0</div>
+    <div class="calculator">
+        <div class="display" id="display">0</div>
         <div class="buttons">
-            <div class="button" data-value="7">7</div>
-            <div class="button" data-value="8">8</div>
-            <div class="button" data-value="9">9</div>
-            <div class="button action" data-value="/">÷</div>
-            <div class="button" data-value="4">4</div>
-            <div class="button" data-value="5">5</div>
-            <div class="button" data-value="6">6</div>
-            <div class="button action" data-value="*">×</div>
-            <div class="button" data-value="1">1</div>
-            <div class="button" data-value="2">2</div>
-            <div class="button" data-value="3">3</div>
-            <div class="button action" data-value="-">−</div>
-            <div class="button zero" data-value="0">0</div>
-            <div class="button" data-value=".">.</div>
-            <div class="button action" data-value="+">+</div>
-            <div class="button action highlight" data-value="=">=</div>
-            <div class="button action" data-value="C" style="grid-column:span 4;text-align: center;">Clear</div>
+            <button class="button" onclick="clearDisplay()">C</button>
+            <button class="button" onclick="deleteLast()">DEL</button>
+            <button class="button" onclick="append('%')">%</button>
+            <button class="button accent" onclick="append('/')">/</button>
+
+            <button class="button" onclick="append('7')">7</button>
+            <button class="button" onclick="append('8')">8</button>
+            <button class="button" onclick="append('9')">9</button>
+            <button class="button accent" onclick="append('*')">*</button>
+
+            <button class="button" onclick="append('4')">4</button>
+            <button class="button" onclick="append('5')">5</button>
+            <button class="button" onclick="append('6')">6</button>
+            <button class="button accent" onclick="append('-')">-</button>
+
+            <button class="button" onclick="append('1')">1</button>
+            <button class="button" onclick="append('2')">2</button>
+            <button class="button" onclick="append('3')">3</button>
+            <button class="button accent" onclick="append('+')">+</button>
+
+            <button class="button large" onclick="append('0')">0</button>
+            <button class="button" onclick="append('.')">.</button>
+            <button class="button accent" onclick="calculate()">=</button>
         </div>
     </div>
-    <script>
-        const display = document.getElementById("display");
-        const buttons = document.querySelectorAll(".button");
-        let currentValue = "0";
-        let operator = null;
-        let storedValue = null;
 
-        function updateDisplay() {
-            display.textContent = currentValue;
+    <script>
+        const display = document.getElementById('display');
+
+        function clearDisplay() {
+            display.textContent = '0';
         }
 
-        buttons.forEach(button => {
-            button.addEventListener("click", () => {
-                const value = button.getAttribute("data-value");
-                
-                if (value === "C") {
-                    currentValue = "0";
-                    storedValue = null;
-                    operator = null;
-                } else if (value === "=") {
-                    if (storedValue !== null && operator) {
-                        currentValue = eval(`${storedValue} ${operator} ${currentValue}`);
-                        storedValue = null;
-                    }
-                } else if ("+-*/".includes(value)) {
-                    storedValue = currentValue;
-                    operator = value;
-                    currentValue = "0";
-                } else {
-                    currentValue = currentValue === "0" ? value : currentValue + value;
-                }
-                updateDisplay();
-            });
-        });
+        function deleteLast() {
+            display.textContent = display.textContent.slice(0, -1) || '0';
+        }
 
-        updateDisplay();
+        function append(value) {
+            if (display.textContent === '0' && value !== '.') {
+                display.textContent = value;
+            } else {
+                display.textContent += value;
+            }
+        }
+
+        function calculate() {
+            try {
+                const result = eval(display.textContent);
+                display.textContent = result % 1 === 0 ? result : result.toFixed(2);
+            } catch (error) {
+                display.textContent = 'Error';
+            }
+        }
     </script>
 </body>
 </html>
