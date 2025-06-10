@@ -21,6 +21,7 @@ import os
 import re
 import asyncio
 import subprocess
+import traceback
 from pathlib import Path
 from typing import List
 from dotenv import load_dotenv
@@ -582,7 +583,6 @@ async def execute_git_push():
             
     except Exception as e:
         print(f"❌ Error during Git push: {e}")
-        import traceback
         traceback.print_exc()
         # Restore original directory in case of exception
         try:
@@ -753,7 +753,6 @@ async def execute_git_push_with_script():
         return False
     except Exception as e:
         print(f"❌ Exception during script execution: {e}")
-        import traceback
         traceback.print_exc()
         return False
 
@@ -1093,7 +1092,6 @@ async def handle_approval(chat_history, user_decision="APPROVED"):
     except Exception as e:
         error_msg = f"❌ Exception in handle_approval: {e}"
         print(error_msg)
-        import traceback
         traceback.print_exc()
         return None, error_msg    
 
@@ -1119,7 +1117,6 @@ async def main():
         print("\n🛑 Workflow interrupted by user")
     except Exception as e:
         print(f"❌ Fatal error in workflow: {e}")
-        import traceback
         traceback.print_exc()
     finally:
         print("🔄 Cleaning up resources...")
