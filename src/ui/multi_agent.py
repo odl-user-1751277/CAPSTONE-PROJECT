@@ -1,3 +1,21 @@
+#!/usr/bin/env python3
+"""
+Multi-Agent Web Development Workflow with Strict Approval Requirement
+
+CRITICAL SECURITY REQUIREMENT:
+- User MUST explicitly type "APPROVED" before any GitHub commit/push occurs
+- This applies to both terminal and Streamlit modes
+- No automatic deployment without explicit user approval
+- Protects against accidental code deployment
+
+Workflow:
+1. BusinessAnalyst gathers requirements
+2. SoftwareEngineer generates code in HTML blocks
+3. ProductOwner reviews and says "READY FOR USER APPROVAL"
+4. USER MUST TYPE "APPROVED" to proceed with GitHub push
+5. System commits and pushes to GitHub with PAT authentication
+"""
+
 import sys
 import os
 import re
@@ -25,7 +43,7 @@ from semantic_kernel.functions.kernel_arguments import KernelArguments
 load_dotenv()
 
 # DEV TOGGLE - Set to False to suppress Git diagnostic messages
-DEV_MODE = False
+DEV_MODE = True
 # ROOT_TOGGLE = True means output to project root, False means UI folder
 ROOT_TOGGLE = True
 
@@ -69,6 +87,88 @@ def _extract_html(text: str) -> str:
         return match.group(1).strip()
     # fallback: if not in code block, return everything
     return text.strip()
+
+# --- Helper function to generate GitHub file URL ---
+def generate_github_file_url(filename="index.html", branch="main"):
+    """Generate GitHub URL for viewing a file based on the GITHUB_REPO_URL in .env"""
+    github_repo_url = os.getenv("GITHUB_REPO_URL", "")
+    
+    if not github_repo_url:
+        return None
+        
+    # Convert git URL to web URL
+    # From: https://github.com/username/repo.git
+    # To: https://github.com/username/repo/blob/main/index.html
+    
+    if github_repo_url.endswith(".git"):
+        web_url = github_repo_url[:-4]  # Remove .git
+    else:
+        web_url = github_repo_url
+        
+    # Ensure it's a GitHub URL
+    if "github.com" not in web_url:
+        return None
+        
+    file_url = f"{web_url}/blob/{branch}/{filename}"
+    return file_url
+
+def generate_github_pages_url(filename="index.html", branch="main"):
+    """Generate GitHub Pages URL for live web app viewing"""
+    github_repo_url = os.getenv("GITHUB_REPO_URL", "")
+    
+    if not github_repo_url:
+        return None
+        
+    # Convert git URL to GitHub Pages URL
+    # From: https://github.com/username/repo.git
+    # To: https://username.github.io/repo/index.html
+    
+    if github_repo_url.endswith(".git"):
+        web_url = github_repo_url[:-4]  # Remove .git
+    else:
+        web_url = github_repo_url
+        
+    # Ensure it's a GitHub URL
+    if "github.com" not in web_url:
+        return None
+    
+    # Extract username and repo name
+    # URL format: https://github.com/username/repo
+    try:
+        parts = web_url.replace("https://github.com/", "").split("/")
+        if len(parts) >= 2:
+            username = parts[0]
+            repo_name = parts[1]
+            
+            # Generate GitHub Pages URL with cache-busting
+            import time
+            cache_buster = int(time.time())  # Current timestamp
+            pages_url = f"https://{username}.github.io/{repo_name}/{filename}?v={cache_buster}"
+            return pages_url
+    except Exception as e:
+        print(f"⚠️ Error generating GitHub Pages URL: {e}")
+        
+    return None
+
+def generate_github_raw_url(filename="index.html", branch="main"):
+    """Generate GitHub raw file URL for direct file access"""
+    github_repo_url = os.getenv("GITHUB_REPO_URL", "")
+    
+    if not github_repo_url:
+        return None
+        
+    if github_repo_url.endswith(".git"):
+        web_url = github_repo_url[:-4]  # Remove .git
+    else:
+        web_url = github_repo_url
+        
+    # Ensure it's a GitHub URL
+    if "github.com" not in web_url:
+        return None
+    
+    # Generate raw URL for direct file access
+    raw_url = f"{web_url}/raw/{branch}/{filename}"
+    return raw_url
 
 # --- Git Diagnostic Function ---
 def diagnose_git_setup():
@@ -143,9 +243,9 @@ class ApprovalTerminationStrategy(TerminationStrategy):
     async def should_agent_terminate(self, agent: Agent, history: List[ChatMessageContent]) -> bool:
         # Look at the last 5 messages for a ProductOwner approval
         for message in reversed(history[-5:]):
-            # If the ProductOwner says "READY FOR USER APPROVAL", end the conversation
-            if (getattr(message, "name", None) == "ProductOwner"
-                and message.content
+            # Simple check: ProductOwner approval
+            if (getattr(message, "name", None) == "ProductOwner" 
+                and message.content 
                 and "READY FOR USER APPROVAL" in message.content.strip().upper()):
                 return True
         # Otherwise, keep going
@@ -167,10 +267,9 @@ CONVERSATION HISTORY:
 SELECTION RULES (follow strictly in order):
 1. If the last message is from User answering questions -> BusinessAnalyst should ask follow-up OR conclude with "Requirements are clear. Ready for development."
 2. If BusinessAnalyst indicated requirements gathering is complete (e.g., said something like "Requirements are clear", "Ready for development", or anything similar) -> SoftwareEngineer
-
 3. If SoftwareEngineer provided code (contains ```html) -> ProductOwner  
 4. If ProductOwner requested changes/feedback -> SoftwareEngineer
-5. If ProductOwner said "APPROVED" -> conversation ends
+5. If ProductOwner said "READY FOR USER APPROVAL" -> conversation ends and it goes for USer approval
 6. If BusinessAnalyst keeps repeating without user response -> SoftwareEngineer (assume requirements gathered)
 
 IMPORTANT: 
@@ -216,6 +315,7 @@ def create_business_analyst(kernel: Kernel) -> ChatCompletionAgent:
         instructions="""
 You are a Business Analyst. Upon receiving the user's initial request, immediately generate a detailed requirements document and project plan for the Software Engineer and Product Owner. 
 
+When documenting requirements, explicitly state ALL critical components, including those that might seem "obvious" (e.g., for a calculator: clearly specify "numeric keypad with buttons 0-9", for a form: "input fields for Name, Email, Phone", etc.).
 If any requirement is unclear or missing, make reasonable assumptions and proceed. 
 DO NOT ask the user questions or wait for any reply.
 Summarize the requirements and end your message with: "Requirements are clear. Ready for development."
@@ -237,9 +337,33 @@ REQUIREMENTS:
 - Include all necessary functionality as specified.
 - Present all code in a single code block, using this format: ```html [your code here] ```
 - After the code block, say: "Implementation complete. Ready for review."
+- Strive to fulfill ALL requests and follow industry best practices to demonstrate excellent engineering skills.
 
 If anything is unclear, make reasonable assumptions. Do NOT ask the BusinessAnalyst or user any questions.
 Focus on creating something that actually works and looks professional.
+
+**MANDATORY**: Every implementation response MUST include the complete HTML code wrapped in ```html``` code blocks. Never respond with just text - always include the working code.
+
+**CODE FORMAT**:
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[Descriptive Title]</title>
+    <style>
+        /* Professional CSS with modern practices */
+    </style>
+</head>
+<body>
+    <!-- Semantic HTML structure -->
+    <script>
+        // Robust JavaScript with error handling
+    </script>
+</body>
+</html>
+```
 """
     )
 
@@ -253,12 +377,15 @@ You are the Product Owner.
 When it is your turn, carefully review the latest code provided by the Software Engineer and compare it against the requirements from the Business Analyst and the original user request.
 
 Steps:
+- FIRST, verify that ALL core/essential functionality is present and working (e.g., for a calculator: all number buttons 0-9, basic operations; for a form: all required input fields, etc.).
 - If the code block is missing, or the code is incomplete or incorrect, REJECT and give *specific feedback* on what's missing.
 - If the code meets ALL requirements and is in a single complete ```html ... ``` code block, respond with your evaluation and end with:
 
 READY FOR USER APPROVAL
 
-Do NOT approve anything incomplete, missing, or not in the correct format. Do NOT give code, only review and make decisions.
+After several iterations with the Software Engineer, if certain requirements prove challenging to implement and are not essential to core functionality, you may choose to approve the solution by focusing on the most important features that provide value to the user.
+
+Do NOT include the READY FOR USER APPROVAL phrase in the message nor approve anything incomplete, missing, or not in the correct format. Do NOT give code, only review and make decisions.
 """
     )
 
@@ -527,13 +654,22 @@ async def execute_git_push_with_script():
 
     return result.returncode == 0
 
-# --- Enhanced Multi-Agent Workflow ---
-async def run_multi_agent(user_input: str):
+    # Enhanced Multi-Agent Workflow ---
+async def run_multi_agent(user_input: str, streamlit_mode=False):
     print("=" * 60)
     print("🚀 MULTI-AGENT WEB DEVELOPMENT WORKFLOW")
     print("=" * 60)
     print(f"📝 User Request: {user_input}")
     print("=" * 60)
+    
+    # Track completion status
+    workflow_status = {
+        "completed": False,
+        "safety_limit_reached": False,
+        "approval_ready": False,
+        "error_occurred": False,
+        "error_message": ""
+    }
     
     # Kernel and services
     kernel = Kernel()
@@ -600,9 +736,10 @@ async def run_multi_agent(user_input: str):
         print(f"✅ Last agent: {agent_name}")
         print(f"⌛ Processing...\n")
 
-        # Check for ProductOwner approval
+        # Check for ProductOwner approval - use simple logic from old working file
         if agent_name == "ProductOwner" and "READY FOR USER APPROVAL" in content.content.upper():
             ready_for_user_approval = True
+            workflow_status["approval_ready"] = True
             print("🎯 READY FOR USER APPROVAL detected!")
             break
 
@@ -619,6 +756,7 @@ async def run_multi_agent(user_input: str):
         # Safety checks
         if message_count > 20:
             print("⚠️ Safety limit reached. Ending conversation.")
+            workflow_status["safety_limit_reached"] = True
             break
         if agent_name == "BusinessAnalyst" and business_analyst_questions > 2:
             print("⚠️ BusinessAnalyst asked too many questions. Moving to development.")
@@ -637,34 +775,107 @@ async def run_multi_agent(user_input: str):
         getattr(m, "name", None) == "ProductOwner" and m.content and "READY FOR USER APPROVAL" in m.content.upper()
         for m in chat.history[-5:]
     )
+    
+    # Update workflow status
+    if approval_in_history:
+        workflow_status["approval_ready"] = True
+        workflow_status["completed"] = True
+    
+    # Collect all chat messages (for Streamlit) before returning
+    streamlit_messages = []
+    for m in chat.history:
+        streamlit_messages.append({
+            "role": getattr(m, 'name', getattr(m, 'role', 'assistant')),
+            "content": getattr(m, 'content', str(m))
+        })
+    
+    # Handle safety limit reached scenario
+    if workflow_status["safety_limit_reached"]:
+        print("⚠️ Workflow stopped due to safety limit (20 messages)")
+        if streamlit_mode:
+            return {
+                "messages": streamlit_messages,
+                "status": "safety_limit_reached",
+                "error_message": "The conversation exceeded the safety limit of 20 messages. This usually happens when the agents get stuck in a loop or have unclear requirements."
+            }
+        else:
+            print("❌ The workflow exceeded the safety limit. Please try with clearer requirements.")
+            return streamlit_messages
+    
+    # Handle normal approval flow
+    
     if approval_in_history:
         print("🎯 ProductOwner says project is ready!")
-        print("Type 'APPROVED' to finalize and push to GitHub, or anything else to exit:")
-        user_approval = input().strip()
-        if user_approval.upper() == "APPROVED":
-            # Extract HTML code from SoftwareEngineer messages
-            html_code = None
-            for message in chat.history:
-                if getattr(message, 'name', None) == "SoftwareEngineer":
-                    extracted_html = _extract_html(message.content)
-                    if extracted_html and len(extracted_html) > 50:
-                        html_code = extracted_html
-                        break
-            if html_code:
-                HTML_OUTPUT_FILE.write_text(html_code, encoding="utf-8")
-                print(f"💾 Saved HTML to: {HTML_OUTPUT_FILE.resolve()}")
-                
-                print("🚀 Pushing to GitHub...")
-                await execute_git_push_with_script()
-            else:
-                print("❌ No valid HTML code found.")
+        
+        # Handle different modes: terminal vs Streamlit
+        if streamlit_mode:
+            # For Streamlit: Return special state indicating approval is needed
+            return {
+                "messages": streamlit_messages,
+                "status": "awaiting_approval",
+                "chat_history": chat.history
+            }
         else:
-            print("❌ Solution not approved. Exiting without saving.")
+            # For terminal: Use input() as before - REQUIREMENT: User must type "APPROVED"
+            print("🔐 SECURITY CHECK - User Approval Required!")
+            print("Type 'APPROVED' to finalize and push to GitHub, or anything else to exit:")
+            user_approval = input().strip()
+            if user_approval.upper() == "APPROVED":
+                print("✅ User typed 'APPROVED' - proceeding with deployment...")
+                # Extract HTML code from SoftwareEngineer messages
+                html_code = None
+                for message in chat.history:
+                    if getattr(message, 'name', None) == "SoftwareEngineer":
+                        extracted_html = _extract_html(message.content)
+                        if extracted_html and len(extracted_html) > 50:
+                            html_code = extracted_html
+                            break
+                if html_code:
+                    HTML_OUTPUT_FILE.write_text(html_code, encoding="utf-8")
+                    print(f"💾 Saved HTML to: {HTML_OUTPUT_FILE.resolve()}")
+                    # User already approved with "APPROVED", so push automatically
+                    push_success = await execute_git_push_with_script()
+                    
+                    # Generate GitHub URLs: Pages URL (for live app), file URL (for source code), and raw URL (for download)
+                    github_pages_url = generate_github_pages_url("index.html", "main")
+                    github_file_url = generate_github_file_url("index.html", "main")
+                    github_raw_url = generate_github_raw_url("index.html", "main")
+                    print("=" * 60)
+                    print("🎉 WEB APP DEPLOYMENT COMPLETED!")
+                    print("=" * 60)
+                    
+                    if push_success:
+                        if github_pages_url:
+                            print(f"🔗 View your live app: {github_pages_url}")
+                            print("   (Note: GitHub Pages may take a few minutes to activate if this is your first deployment)")
+                        print(f"📄 View source code: {github_file_url}")
+                        print(f"⬇️ Direct download: {github_raw_url}")
+                        print(f"📂 GitHub Repository: {os.getenv('GITHUB_REPO_URL', '')}")
+                    else:
+                        print(f"📁 Local file saved: {HTML_OUTPUT_FILE.resolve()}")
+                        
+                    print(f"📊 File size: {len(html_code)} characters")
+                    print("=" * 60)
+                else:
+                    print("❌ No valid HTML code found.")
+            else:
+                print(f"❌ User typed '{user_approval}' instead of 'APPROVED'")
+                print("❌ Solution not approved. Exiting without saving or pushing to GitHub.")
     else:
         print("❌ The Product Owner did NOT approve. Workflow incomplete.")
+        if streamlit_mode:
+            return {
+                "messages": streamlit_messages,
+                "status": "incomplete",
+                "error_message": "The ProductOwner did not approve the solution. The agents may need clearer requirements or the task may be too complex."
+            }
+            
     print("=" * 60)
     print("🎉 MULTI-AGENT WORKFLOW COMPLETED")
     print("=" * 60)
+
+    # Return messages for terminal mode
+    return streamlit_messages
 
     # Collect all chat messages (for Streamlit) before returning
     streamlit_messages = []
@@ -673,7 +884,76 @@ async def run_multi_agent(user_input: str):
             "role": getattr(m, 'name', getattr(m, 'role', 'assistant')),
             "content": getattr(m, 'content', str(m))
         })
-    return streamlit_messages    
+    return streamlit_messages
+
+async def handle_approval(chat_history, user_decision="APPROVED"):
+    """Handle the approval process after user explicitly types 'APPROVED'."""
+    # Fix NoneType error - ensure user_decision is not None
+    if user_decision is None:
+        user_decision = "APPROVED"
+    
+    # SECURITY CHECK: Must be exactly "APPROVED"
+    if user_decision.upper() != "APPROVED":
+        print(f"❌ Security check failed: User provided '{user_decision}' instead of 'APPROVED'")
+        print("❌ Solution not approved. Exiting without saving.")
+        return None, f"❌ Solution not approved. User typed '{user_decision}' instead of 'APPROVED'."
+    
+    print("✅ User explicitly approved with 'APPROVED'! Processing...")
+    
+    # Extract HTML code from SoftwareEngineer messages
+    html_code = None
+    for message in chat_history:
+        if getattr(message, 'name', None) == "SoftwareEngineer":
+            extracted_html = _extract_html(message.content)
+            if extracted_html and len(extracted_html) > 50:
+                html_code = extracted_html
+                break
+                
+    if html_code:
+        # Always save HTML locally first
+        HTML_OUTPUT_FILE.write_text(html_code, encoding="utf-8")
+        print(f"💾 Saved HTML to: {HTML_OUTPUT_FILE.resolve()}")
+        
+        print("🚀 Pushing to GitHub...")
+        push_success = await execute_git_push_with_script()
+        
+        # Generate GitHub URLs: Pages URL (for live app), file URL (for source code), and raw URL (for download)
+        github_pages_url = generate_github_pages_url("index.html", "main")
+        github_file_url = generate_github_file_url("index.html", "main")
+        github_raw_url = generate_github_raw_url("index.html", "main")
+        
+        # Show results in terminal
+        print("=" * 60)
+        print("🎉 WEB APP DEPLOYMENT COMPLETED!")
+        print("=" * 60)
+        
+        if push_success:
+            if github_pages_url:
+                print(f"🔗 View your live app: {github_pages_url}")
+                print("   (Note: GitHub Pages may take a few minutes to activate if this is your first deployment)")
+            print(f"📄 View source code: {github_file_url}")
+            print(f"⬇️ Direct download: {github_raw_url}")
+            print(f"📂 GitHub Repository: {os.getenv('GITHUB_REPO_URL', '')}")
+        else:
+            print(f"📁 Local file saved: {HTML_OUTPUT_FILE.resolve()}")
+            
+        print(f"📊 File size: {len(html_code)} characters")
+        print("=" * 60)
+        
+        # Prepare result message for Streamlit
+        result_message = f"✅ Web app created and saved!\n"
+        if push_success:
+            if github_pages_url:
+                result_message += f"🔗 View your live app: {github_pages_url}\n"
+            result_message += f"📄 View source code: {github_file_url}\n"
+            result_message += f"⬇️ Direct download: {github_raw_url}\n"
+        else:
+            result_message += f"📁 Local file: {HTML_OUTPUT_FILE.resolve()}\n"
+        result_message += f"📊 File size: {len(html_code)} characters"
+        
+        return html_code, result_message
+    else:
+        return None, "❌ No valid HTML code found."    
 
 # --- Main execution ---
 async def main():
@@ -703,7 +983,111 @@ async def main():
         print("🔄 Cleaning up resources...")
         await asyncio.sleep(0.1)
 
-if __name__ == "__main__":
+# --- Streamlit Interface ---
+def create_streamlit_interface():
+    """Create a simple Streamlit interface for the approval workflow."""
+    try:
+        import streamlit as st
+        
+        st.title("🤖 Multi-Agent Web Development System")
+        st.markdown("---")
+        
+        # Initialize session state
+        if 'chat_result' not in st.session_state:
+            st.session_state.chat_result = None
+        if 'awaiting_approval' not in st.session_state:
+            st.session_state.awaiting_approval = False
+        if 'final_result' not in st.session_state:
+            st.session_state.final_result = None
+            
+        # Input section
+        if not st.session_state.awaiting_approval and st.session_state.final_result is None:
+            user_request = st.text_input("What would you like to build?", placeholder="e.g., A responsive landing page for a coffee shop")
+            
+            if st.button("🚀 Start Development") and user_request.strip():
+                with st.spinner("Running multi-agent workflow..."):
+                    # Run the workflow in Streamlit mode
+                    result = asyncio.run(run_multi_agent(user_request, streamlit_mode=True))
+                    st.session_state.chat_result = result
+                    
+                    if isinstance(result, dict) and result.get("status") == "awaiting_approval":
+                        st.session_state.awaiting_approval = True
+                        st.rerun()
+        
+        # Display chat messages
+        if st.session_state.chat_result and isinstance(st.session_state.chat_result, dict):
+            messages = st.session_state.chat_result.get("messages", [])
+            
+            st.markdown("### 💬 Agent Conversation")
+            for msg in messages:
+                role = msg.get("role", "assistant")
+                content = msg.get("content", "")
+                
+                if role == "BusinessAnalyst":
+                    st.info(f"**📊 Business Analyst:** {content}")
+                elif role == "SoftwareEngineer":
+                    st.success(f"**👨‍💻 Software Engineer:** {content}")
+                elif role == "ProductOwner":
+                    st.warning(f"**📋 Product Owner:** {content}")
+                else:
+                    st.text(f"**{role}:** {content}")
+        
+        # Approval section
+        if st.session_state.awaiting_approval:
+            st.markdown("---")
+            st.markdown("### ✅ Approval Required")
+            st.info("The ProductOwner has reviewed the solution and it's ready for deployment!")
+            
+            # REQUIREMENT: User must type "APPROVED" to proceed
+            st.markdown("**🔐 Security Check: Type 'APPROVED' to finalize and push to GitHub:**")
+            user_approval = st.text_input("Type your approval:", placeholder="Type APPROVED here", key="approval_input")
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("✅ Finalize & Deploy", type="primary"):
+                    if user_approval.strip().upper() == "APPROVED":
+                        with st.spinner("Deploying to GitHub..."):
+                            chat_history = st.session_state.chat_result.get("chat_history", [])
+                            html_code, result_message = asyncio.run(handle_approval(chat_history, "APPROVED"))
+                            st.session_state.final_result = result_message
+                            st.session_state.awaiting_approval = False
+                            st.rerun()
+                    else:
+                        st.error("❌ You must type 'APPROVED' exactly to proceed with deployment!")
+            
+            with col2:
+                if st.button("❌ Reject"):
+                    st.session_state.final_result = "❌ Solution rejected by user."
+                    st.session_state.awaiting_approval = False
+                    st.rerun()
+        
+        # Final result
+        if st.session_state.final_result:
+            st.markdown("---")
+            st.markdown("### 🎉 Final Result")
+            st.success(st.session_state.final_result)
+            
+            if st.button("🔄 Start New Project"):
+                st.session_state.chat_result = None
+                st.session_state.awaiting_approval = False
+                st.session_state.final_result = None
+                st.rerun()
+                
+    except ImportError:
+        st.error("Streamlit not installed. Please install with: pip install streamlit")
+    except Exception as e:
+        st.error(f"Error in Streamlit interface: {e}")
+
+# --- Streamlit App Runner ---
+def run_streamlit_app():
+    """Entry point for Streamlit app."""
+    create_streamlit_interface()
+
+# Check if running in Streamlit
+if __name__ == "__main__" and "streamlit" in sys.modules:
+    run_streamlit_app()
+elif __name__ == "__main__":
+    # Terminal mode
     if os.name == 'nt':
         try:
             asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
