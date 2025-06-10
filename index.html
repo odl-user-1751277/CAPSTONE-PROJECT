@@ -5,11 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculator App</title>
     <style>
-        /* General Styling */
-        body {
-            font-family: Arial, sans-serif;
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -18,180 +21,161 @@
         }
 
         .calculator {
-            width: 320px;
+            width: 300px;
             background: #fff;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
             overflow: hidden;
         }
 
         .display {
-            background-color: #1d1d1d;
-            color: #fff;
+            background: #222;
+            color: #0ff;
             font-size: 2rem;
             text-align: right;
-            padding: 20px;
-            height: 80px;
-            box-sizing: border-box;
+            padding: 15px;
+            height: 60px;
         }
 
         .buttons {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            padding: 10px;
         }
 
-        .button {
-            background: #ececec;
-            border: none;
-            height: 60px;
-            font-size: 1.2rem;
-            border-radius: 5px;
+        button {
+            font-size: 1.5rem;
+            padding: 20px;
+            border: 1px solid #ccc;
+            background: #f9f9f9;
+            outline: none;
             cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            transition: background 0.3s;
+            transition: background-color 0.3s ease;
         }
 
-        .button:hover {
-            background: #ddd;
+        button:hover {
+            background-color: #eee;
         }
 
-        .button.operator {
-            background: #ffa500;
-            color: #fff;
+        button.operation {
+            background-color: #fda085;
         }
 
-        .button.operator:hover {
-            background: #e09400;
+        button.operation:hover {
+            background-color: #fb8c6e;
         }
 
-        .button.equals {
-            background: #28a745;
-            color: #fff;
-            grid-column: span 2;
+        button.equal {
+            background-color: #42b883;
+            grid-column: span 4;
         }
 
-        .button.equals:hover {
-            background: #218838;
-        }
-
-        .button.clear {
-            background: #dc3545;
-            color: #fff;
-        }
-
-        .button.clear:hover {
-            background: #bd2130;
+        button.equal:hover {
+            background-color: #36a372;
         }
     </style>
 </head>
 <body>
-
-<div class="calculator">
-    <div class="display" id="display">0</div>
-    <div class="buttons">
-        <button class="button clear" onclick="clearDisplay()">C</button>
-        <button class="button" onclick="deleteLast()">⌫</button>
-        <button class="button operator" onclick="appendOperator('%')">%</button>
-        <button class="button operator" onclick="appendOperator('/')">÷</button>
-        <button class="button" onclick="appendNumber(7)">7</button>
-        <button class="button" onclick="appendNumber(8)">8</button>
-        <button class="button" onclick="appendNumber(9)">9</button>
-        <button class="button operator" onclick="appendOperator('*')">×</button>
-        <button class="button" onclick="appendNumber(4)">4</button>
-        <button class="button" onclick="appendNumber(5)">5</button>
-        <button class="button" onclick="appendNumber(6)">6</button>
-        <button class="button operator" onclick="appendOperator('-')">-</button>
-        <button class="button" onclick="appendNumber(1)">1</button>
-        <button class="button" onclick="appendNumber(2)">2</button>
-        <button class="button" onclick="appendNumber(3)">3</button>
-        <button class="button operator" onclick="appendOperator('+')">+</button>
-        <button class="button" onclick="appendNumber(0)">0</button>
-        <button class="button" onclick="appendDot()">.</button>
-        <button class="button equals" onclick="calculate()">=</button>
+    <div class="calculator">
+        <div class="display" id="display">0</div>
+        <div class="buttons">
+            <button class="operation" onclick="clearAll()">AC</button>
+            <button class="operation" onclick="clearEntry()">CE</button>
+            <button class="operation" onclick="pressOperator('%')">%</button>
+            <button class="operation" onclick="pressOperator('/')">÷</button>
+            <button onclick="pressNumber('7')">7</button>
+            <button onclick="pressNumber('8')">8</button>
+            <button onclick="pressNumber('9')">9</button>
+            <button class="operation" onclick="pressOperator('*')">×</button>
+            <button onclick="pressNumber('4')">4</button>
+            <button onclick="pressNumber('5')">5</button>
+            <button onclick="pressNumber('6')">6</button>
+            <button class="operation" onclick="pressOperator('-')">−</button>
+            <button onclick="pressNumber('1')">1</button>
+            <button onclick="pressNumber('2')">2</button>
+            <button onclick="pressNumber('3')">3</button>
+            <button class="operation" onclick="pressOperator('+')">+</button>
+            <button onclick="pressNumber('0')">0</button>
+            <button onclick="pressNumber('.')">.</button>
+            <button class="equal" onclick="calculate()">=</button>
+        </div>
     </div>
-</div>
 
-<script>
-    // Global Variables
-    let currentInput = "";
-    let resultDisplayed = false;
+    <script>
+        let display = document.getElementById("display");
+        let currentOperand = '';
+        let previousOperand = '';
+        let operation = null;
 
-    // Update the Display
-    function updateDisplay(value) {
-        const display = document.getElementById("display");
-        display.textContent = value;
-    }
-
-    // Clear the Display
-    function clearDisplay() {
-        currentInput = "";
-        updateDisplay("0");
-        resultDisplayed = false;
-    }
-
-    // Delete the Last Character
-    function deleteLast() {
-        if (resultDisplayed) return; // No modification allowed after = is pressed
-        currentInput = currentInput.slice(0, -1);
-        updateDisplay(currentInput || "0");
-    }
-
-    // Append a Number
-    function appendNumber(number) {
-        if (resultDisplayed) {
-            currentInput = "";
-            resultDisplayed = false;
+        // Update Display Function
+        function updateDisplay() {
+            display.textContent = currentOperand || '0';
         }
-        currentInput += number;
-        updateDisplay(currentInput);
-    }
 
-    // Append a Dot
-    function appendDot() {
-        if (resultDisplayed) {
-            currentInput = "0.";
-            resultDisplayed = false;
-            updateDisplay(currentInput);
-            return;
+        // Handle Number Press
+        function pressNumber(num) {
+            if (num === '.' && currentOperand.includes('.')) return;
+            currentOperand = currentOperand.toString() + num.toString();
+            updateDisplay();
         }
-        if (!currentInput.includes(".")) {
-            currentInput += ".";
-            updateDisplay(currentInput);
-        }
-    }
 
-    // Append an Operator
-    function appendOperator(operator) {
-        if (resultDisplayed) {
-            currentInput = "";
-            resultDisplayed = false;
+        // Handle Operator Press
+        function pressOperator(op) {
+            if (currentOperand === '') return;
+            if (previousOperand !== '') {
+                calculate();
+            }
+            operation = op;
+            previousOperand = currentOperand;
+            currentOperand = '';
         }
-        if (
-            currentInput.length > 0 &&
-            !["+", "-", "*", "/", "%"].includes(currentInput.slice(-1))
-        ) {
-            currentInput += operator;
-            updateDisplay(currentInput);
-        }
-    }
 
-    // Perform Calculation
-    function calculate() {
-        try {
-            const sanitizedInput = currentInput.replace(/×/g, "*").replace(/÷/g, "/");
-            const result = eval(sanitizedInput);
-            updateDisplay(result);
-            resultDisplayed = true;
-            currentInput = result.toString();
-        } catch (error) {
-            updateDisplay("Error");
-            resultDisplayed = true;
-            currentInput = "";
-        }
-    }
-</script>
+        // Perform Calculation
+        function calculate() {
+            let computation;
+            const prev = parseFloat(previousOperand);
+            const curr = parseFloat(currentOperand);
 
+            if (isNaN(prev) || isNaN(curr)) return;
+
+            switch (operation) {
+                case '+':
+                    computation = prev + curr;
+                    break;
+                case '-':
+                    computation = prev - curr;
+                    break;
+                case '*':
+                    computation = prev * curr;
+                    break;
+                case '/':
+                    computation = curr === 0 ? 'Error' : prev / curr;
+                    break;
+                case '%':
+                    computation = prev * (curr / 100);
+                    break;
+                default:
+                    return;
+            }
+
+            currentOperand = computation.toString();
+            operation = null;
+            previousOperand = '';
+            updateDisplay();
+        }
+
+        // Clear All Function
+        function clearAll() {
+            currentOperand = '';
+            previousOperand = '';
+            operation = null;
+            updateDisplay();
+        }
+
+        // Clear Entry Function
+        function clearEntry() {
+            currentOperand = '';
+            updateDisplay();
+        }
+    </script>
 </body>
 </html>
