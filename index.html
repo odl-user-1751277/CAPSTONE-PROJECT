@@ -5,160 +5,171 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculator App</title>
     <style>
-        /* General styling for a clean, modern look */
         body {
             font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            background-color: #f4f4f4;
+            min-height: 100vh;
+            margin: 0;
+            background: #f4f4f4;
         }
-
         .calculator {
-            width: 320px;
-            background: #fff;
+            background: #ffffff;
+            width: 300px;
             border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
             overflow: hidden;
         }
-
-        .calculator-display {
-            padding: 15px;
-            background: #323232;
-            color: #fff;
-            text-align: right;
+        .display {
+            background: #222;
+            color: #0f0;
             font-size: 2rem;
-            height: 80px;
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
+            text-align: right;
+            padding: 20px;
+            height: 60px;
             overflow: hidden;
-            word-wrap: break-word;
         }
-
-        .calculator-buttons {
+        .buttons {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 1px;
-            background: #ddd;
         }
-
-        .btn {
+        .button {
             padding: 20px;
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             text-align: center;
-            border: none;
-            outline: none;
+            background: #ddd;
+            border: 1px solid #ccc;
             cursor: pointer;
+            transition: background 0.2s, transform 0.2s;
         }
-
-        .btn.operator {
-            background: #1e90ff;
-            color: white;
+        .button:active {
+            transform: scale(0.95);
+            background: #bbb;
         }
-
-        .btn.clear {
-            background: #ff5252;
-            color: white;
+        .button.operator {
+            background: #f0a500;
+            color: #fff;
         }
-
-        .btn.equal {
-            background: #4caf50;
-            color: white;
+        .button.operator:active {
+            background: #c07800;
         }
-
-        .btn:hover {
-            opacity: 0.9;
+        .button.clear {
+            background: #ff4c4c;
+            color: #fff;
         }
-
-        @media (max-width: 400px) {
-            .calculator {
-                width: 100%;
-            }
-
-            .btn {
-                font-size: 1.2rem;
-                padding: 15px;
-            }
+        .button.clear:active {
+            background: #cc0000;
         }
     </style>
 </head>
 <body>
     <div class="calculator">
-        <div class="calculator-display" id="display">0</div>
-        <div class="calculator-buttons">
-            <button class="btn clear" onclick="clearDisplay()">C</button>
-            <button class="btn" onclick="deleteLast()">⌫</button>
-            <button class="btn operator" onclick="appendOperator('/')">÷</button>
-            <button class="btn operator" onclick="appendOperator('*')">×</button>
-            <button class="btn" onclick="appendNumber('7')">7</button>
-            <button class="btn" onclick="appendNumber('8')">8</button>
-            <button class="btn" onclick="appendNumber('9')">9</button>
-            <button class="btn operator" onclick="appendOperator('-')">−</button>
-            <button class="btn" onclick="appendNumber('4')">4</button>
-            <button class="btn" onclick="appendNumber('5')">5</button>
-            <button class="btn" onclick="appendNumber('6')">6</button>
-            <button class="btn operator" onclick="appendOperator('+')">+</button>
-            <button class="btn" onclick="appendNumber('1')">1</button>
-            <button class="btn" onclick="appendNumber('2')">2</button>
-            <button class="btn" onclick="appendNumber('3')">3</button>
-            <button class="btn equal" onclick="calculate()">=</button>
-            <button class="btn" onclick="appendNumber('0')" style="grid-column: span 2">0</button>
-            <button class="btn" onclick="appendNumber('.')">.</button>
+        <div class="display" id="display">0</div>
+        <div class="buttons">
+            <div class="button clear" id="clear">C</div>
+            <div class="button operator" data-operation="sqrt">√</div>
+            <div class="button operator" data-operation="%">%</div>
+            <div class="button operator" data-operation="/">÷</div>
+            <div class="button" data-number="7">7</div>
+            <div class="button" data-number="8">8</div>
+            <div class="button" data-number="9">9</div>
+            <div class="button operator" data-operation="*">×</div>
+            <div class="button" data-number="4">4</div>
+            <div class="button" data-number="5">5</div>
+            <div class="button" data-number="6">6</div>
+            <div class="button operator" data-operation="-">−</div>
+            <div class="button" data-number="1">1</div>
+            <div class="button" data-number="2">2</div>
+            <div class="button" data-number="3">3</div>
+            <div class="button operator" data-operation="+">+</div>
+            <div class="button" data-number="0" style="grid-column: span 2;">0</div>
+            <div class="button" data-number=".">.</div>
+            <div class="button operator" data-operation="=">=</div>
         </div>
     </div>
 
     <script>
-        let display = document.getElementById('display');
-        let currentInput = '';
+        const display = document.getElementById('display');
+        let currentOperand = '';
+        let previousOperand = '';
+        let operator = '';
 
-        function appendNumber(number) {
-            if (currentInput === '0' && number === '0') return; // Prevent 000...
-            if (currentInput === '0' && number !== '.') currentInput = ''; // Allow "0."
-            currentInput += number;
-            display.textContent = currentInput;
+        // Function to update the display
+        function updateDisplay() {
+            display.textContent = currentOperand || '0';
         }
 
-        function appendOperator(operator) {
-            if (endsWithOperator(currentInput)) return; // Prevent duplicate operators
-            currentInput += ` ${operator} `;
-            display.textContent = currentInput;
-        }
+        // Handle button clicks
+        document.querySelectorAll('.button').forEach(button => {
+            button.addEventListener('click', () => {
+                const number = button.dataset.number;
+                const operation = button.dataset.operation;
 
-        function clearDisplay() {
-            currentInput = '';
-            display.textContent = '0';
-        }
-
-        function deleteLast() {
-            if (currentInput.length > 0) {
-                currentInput = currentInput.trimEnd();
-                if (currentInput.endsWith('+') || currentInput.endsWith('-') || currentInput.endsWith('*') || currentInput.endsWith('/')) {
-                    currentInput = currentInput.slice(0, -2); // Remove operator + space
-                } else {
-                    currentInput = currentInput.slice(0, -1); // Remove single character
+                if (number) {
+                    if (number === '.' && currentOperand.includes('.')) return;
+                    currentOperand += number;
+                } else if (operation) {
+                    if (operation === '=') {
+                        if (previousOperand && operator) {
+                            calculate();
+                        }
+                    } else if (operation === 'C') {
+                        clearAll();
+                    } else if (operation === 'sqrt') {
+                        currentOperand = Math.sqrt(parseFloat(currentOperand)) || '0';
+                    } else {
+                        if (currentOperand) {
+                            if (previousOperand && operator) {
+                                calculate();
+                            }
+                            operator = operation;
+                            previousOperand = currentOperand;
+                            currentOperand = '';
+                        }
+                    }
                 }
-            }
-            display.textContent = currentInput || '0';
+
+                updateDisplay();
+            });
+        });
+
+        // Clear all input
+        function clearAll() {
+            currentOperand = '';
+            previousOperand = '';
+            operator = '';
+            updateDisplay();
         }
 
+        // Perform calculation
         function calculate() {
-            try {
-                const formattedInput = currentInput.replace(/×/g, '*').replace(/÷/g, '/');
-                const result = eval(formattedInput);
-                currentInput = result.toString();
-                display.textContent = currentInput;
-            } catch (error) {
-                display.textContent = 'Error';
-                currentInput = '';
-            }
-        }
+            const prev = parseFloat(previousOperand);
+            const curr = parseFloat(currentOperand);
+            if (isNaN(prev) || isNaN(curr)) return;
 
-        function endsWithOperator(input) {
-            return input && (input.endsWith('+') || input.endsWith('-') || input.endsWith('*') || input.endsWith('/'));
+            switch (operator) {
+                case '+':
+                    currentOperand = (prev + curr).toString();
+                    break;
+                case '-':
+                    currentOperand = (prev - curr).toString();
+                    break;
+                case '*':
+                    currentOperand = (prev * curr).toString();
+                    break;
+                case '/':
+                    currentOperand = curr === 0 ? 'Error' : (prev / curr).toString();
+                    break;
+                case '%':
+                    currentOperand = (prev % curr).toString();
+                    break;
+                default:
+                    return;
+            }
+            previousOperand = '';
+            operator = '';
         }
     </script>
 </body>
