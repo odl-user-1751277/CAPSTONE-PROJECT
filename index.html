@@ -3,129 +3,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculator App</title>
+    <title>Responsive Calculator App</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
+
         body {
             font-family: Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background-color: #f3f3f3;
-            padding: 20px;
+            background-color: #f4f4f4;
+            padding: 1rem;
         }
+
         .calculator {
             width: 100%;
             max-width: 400px;
-            background-color: #ffffff;
-            padding: 20px;
-            border-radius: 16px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
-        .display {
-            width: 100%;
-            background-color: #f7f7f7;
-            font-size: 2rem;
-            text-align: right;
-            margin-bottom: 20px;
-            padding: 10px 15px;
             border-radius: 8px;
-            border: 1px solid #ddd;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            background-color: white;
         }
+
+        .display {
+            background-color: #222;
+            color: #fff;
+            font-size: 2rem;
+            padding: 1rem;
+            text-align: right;
+            height: 80px;
+            overflow-x: auto;
+        }
+
         .buttons {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
+            gap: 1px;
+            background-color: #ccc;
         }
+
         button {
-            font-size: 1.2rem;
-            padding: 15px;
+            height: 80px;
+            font-size: 1.5rem;
             border: none;
-            border-radius: 8px;
+            outline: none;
+            background-color: white;
             cursor: pointer;
-            background-color: #e0e0e0;
-            color: #333;
+            transition: background-color 0.2s, color 0.2s;
         }
-        button.operation {
-            background-color: #f39c12;
-            color: #ffffff;
+
+        button:hover {
+            background-color: #2196f3;
+            color: white;
         }
-        button.equals {
-            background-color: #27ae60;
-            color: #ffffff;
+
+        button.orange {
+            background-color: #ffa726;
+            color: white;
         }
-        button:active {
-            transform: scale(0.98);
+
+        button.orange:hover {
+            background-color: #fb8c00;
+            color: white;
         }
-        @media (max-width: 480px) {
-            .display {
-                font-size: 1.5rem;
+
+        button.large {
+            grid-column: span 2;
+        }
+
+        @media (max-width: 768px) {
+            button {
+                font-size: 1.2rem;
             }
+        }
+
+        @media (max-width: 480px) {
             button {
                 font-size: 1rem;
-                padding: 12px;
             }
         }
     </style>
 </head>
 <body>
     <div class="calculator">
-        <div id="display" class="display">0</div>
+        <div class="display" id="display">0</div>
         <div class="buttons">
-            <button onclick="clearDisplay()">C</button>
-            <button onclick="backspace()">←</button>
-            <button onclick="append('%')">%</button>
-            <button onclick="append('/')">÷</button>
-            <button onclick="append('7')">7</button>
-            <button onclick="append('8')">8</button>
-            <button onclick="append('9')">9</button>
-            <button onclick="append('*')">×</button>
-            <button onclick="append('4')">4</button>
-            <button onclick="append('5')">5</button>
-            <button onclick="append('6')">6</button>
-            <button onclick="append('-')">−</button>
-            <button onclick="append('1')">1</button>
-            <button onclick="append('2')">2</button>
-            <button onclick="append('3')">3</button>
-            <button onclick="append('+')">+</button>
-            <button onclick="append('0')">0</button>
-            <button onclick="append('.')">.</button>
-            <button class="equals" onclick="calculate()">=</button>
+            <button onclick="appendNumber('7')">7</button>
+            <button onclick="appendNumber('8')">8</button>
+            <button onclick="appendNumber('9')">9</button>
+            <button class="orange" onclick="operate('/')">÷</button>
+
+            <button onclick="appendNumber('4')">4</button>
+            <button onclick="appendNumber('5')">5</button>
+            <button onclick="appendNumber('6')">6</button>
+            <button class="orange" onclick="operate('*')">×</button>
+
+            <button onclick="appendNumber('1')">1</button>
+            <button onclick="appendNumber('2')">2</button>
+            <button onclick="appendNumber('3')">3</button>
+            <button class="orange" onclick="operate('-')">−</button>
+
+            <button onclick="appendNumber('0')" class="large">0</button>
+            <button onclick="appendNumber('.')">.</button>
+            <button class="orange" onclick="operate('+')">+</button>
+            
+            <button onclick="clearDisplay()">AC</button>
+            <button onclick="deleteLast()">DEL</button>
+            <button onclick="calculate()">=</button>
+            <button onclick="operate('%')">%</button>
         </div>
     </div>
-
     <script>
-        const display = document.getElementById('display');
+        let displayValue = '';
+        let currentOperation = null;
+        let storedValue = null;
 
         function clearDisplay() {
-            display.innerText = '0';
+            displayValue = '';
+            currentOperation = null;
+            storedValue = null;
+            updateDisplay('0');
         }
 
-        function backspace() {
-            display.innerText = display.innerText.slice(0, -1) || '0';
+        function appendNumber(num) {
+            if (num === '.' && displayValue.includes('.')) return;
+            displayValue += num;
+            updateDisplay(displayValue);
         }
 
-        function append(value) {
-            if (display.innerText === '0' && value !== '.') {
-                display.innerText = value;
-            } else {
-                display.innerText += value;
+        function deleteLast() {
+            displayValue = displayValue.slice(0, -1);
+            updateDisplay(displayValue || '0');
+        }
+
+        function operate(operator) {
+            if (currentOperation && storedValue !== null) {
+                calculate();
             }
+            currentOperation = operator;
+            storedValue = parseFloat(displayValue);
+            displayValue = '';
         }
 
         function calculate() {
-            try {
-                const result = eval(display.innerText.replace('×', '*').replace('÷', '/'));
-                display.innerText = Number.isFinite(result) ? result : 'Error';
-            } catch (error) {
-                display.innerText = 'Error';
+            if (storedValue === null || currentOperation === null || displayValue === '') return;
+            const currentValue = parseFloat(displayValue);
+            let result;
+
+            switch (currentOperation) {
+                case '+':
+                    result = storedValue + currentValue;
+                    break;
+                case '-':
+                    result = storedValue - currentValue;
+                    break;
+                case '*':
+                    result = storedValue * currentValue;
+                    break;
+                case '/':
+                    if (currentValue === 0) {
+                        alert("Cannot divide by zero");
+                        clearDisplay();
+                        return;
+                    }
+                    result = storedValue / currentValue;
+                    break;
+                case '%':
+                    result = storedValue % currentValue;
+                    break;
+                default:
+                    return;
             }
+
+            displayValue = result.toString();
+            currentOperation = null;
+            storedValue = null;
+            updateDisplay(displayValue);
         }
+
+        function updateDisplay(value) {
+            document.getElementById('display').textContent = value;
+        }
+
+        // Initialize clear display on load
+        clearDisplay();
     </script>
 </body>
 </html>
