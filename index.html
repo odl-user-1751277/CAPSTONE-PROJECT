@@ -3,24 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculator App</title>
+    <title>Responsive Calculator</title>
     <style>
-        /* CSS for modern and clean styling */
         body {
             font-family: Arial, sans-serif;
-            background-color: #f3f3f3;
-            color: #333;
+            margin: 0;
+            padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            margin: 0;
+            background-color: #f0f0f0;
         }
 
-        #calculator {
-            width: 300px;
-            background: #fff;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        .calculator {
+            width: 100%;
+            max-width: 350px;
+            background: #ffffff;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
             border-radius: 10px;
             overflow: hidden;
         }
@@ -28,82 +28,128 @@
         .display {
             background: #222;
             color: #fff;
+            font-size: 2rem;
             text-align: right;
-            padding: 15px;
-            font-size: 1.5rem;
-            height: 60px;
+            padding: 20px;
+            box-sizing: border-box;
+            height: 80px;
             display: flex;
-            justify-content: flex-end;
             align-items: center;
+            justify-content: flex-end;
+            overflow-x: auto;
         }
 
-        .buttons {
+        .keys {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
+            gap: 1px;
+            background: #dcdcdc;
         }
 
-        button {
+        .key {
             height: 60px;
-            font-size: 1.2rem;
-            border: 1px solid #ddd;
+            font-size: 1.5rem;
+            border: none;
             outline: none;
-            cursor: pointer;
             background: #f9f9f9;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background 0.2s;
         }
 
-        button:hover {
-            background: #f1f1f1;
+        .key:active {
+            background: #ddd;
         }
 
-        .operator {
-            background-color: #feca57;
+        .key.operator {
+            background: #ff9800;
+            color: #fff;
         }
 
-        .operator:hover {
-            background-color: #f8b633;
+        .key.clear {
+            background: #f44336;
+            color: #fff;
         }
 
-        .equals {
-            background-color: #1dd1a1;
-            color: white;
+        .key.equals {
+            background: #4caf50;
+            color: #fff;
+            grid-column: span 2;
         }
 
-        .equals:hover {
-            background-color: #10ac84;
-        }
-
-        .clear {
-            background-color: #ff6b6b;
-            color: white;
-        }
-
-        .clear:hover {
-            background-color: #ee5253;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 480px) {
-            #calculator {
-                width: 100%;
-                margin: 0 10px;
+        @media (max-width: 400px) {
+            .display {
+                font-size: 1.5rem;
+                padding: 10px;
             }
 
-            button {
-                font-size: 1rem;
+            .key {
+                font-size: 1.2rem;
             }
         }
     </style>
 </head>
 <body>
-    <div id="calculator">
-        <div id="display" class="display">0</div>
-        <div class="buttons">
-            <button onclick="clearDisplay()" class="clear">AC</button>
-            <button onclick="appendOperator('%')" class="operator">%</button>
-            <button onclick="appendOperator('√')" class="operator">√</button>
-            <button onclick="appendOperator('/')()" class="operator">÷</button>
-            <button onclick="appendNumber('7')">7</button>
-            <button onclick="appendNumber('8')">8</button>
-            <button onclick="appendNumber('9')">9</button>
+    <div class="calculator">
+        <div class="display" id="display">0</div>
+        <div class="keys">
+            <button class="key clear" onclick="clearDisplay()">C</button>
+            <button class="key operator" onclick="appendValue('%')">%</button>
+            <button class="key operator" onclick="backspace()">←</button>
+            <button class="key operator" onclick="appendValue('/')">÷</button>
+            <button class="key" onclick="appendValue('7')">7</button>
+            <button class="key" onclick="appendValue('8')">8</button>
+            <button class="key" onclick="appendValue('9')">9</button>
+            <button class="key operator" onclick="appendValue('*')">×</button>
+            <button class="key" onclick="appendValue('4')">4</button>
+            <button class="key" onclick="appendValue('5')">5</button>
+            <button class="key" onclick="appendValue('6')">6</button>
+            <button class="key operator" onclick="appendValue('-')">−</button>
+            <button class="key" onclick="appendValue('1')">1</button>
+            <button class="key" onclick="appendValue('2')">2</button>
+            <button class="key" onclick="appendValue('3')">3</button>
+            <button class="key operator" onclick="appendValue('+')">+</button>
+            <button class="key" onclick="appendValue('0')">0</button>
+            <button class="key" onclick="appendValue('.')">.</button>
+            <button class="key equals" onclick="calculate()">=</button>
         </div>
+    </div>
+
+    <script>
+        const display = document.getElementById('display');
+
+        function appendValue(value) {
+            if (display.textContent === '0' || display.textContent === 'Error') {
+                display.textContent = value;
+            } else {
+                display.textContent += value;
+            }
+        }
+
+        function clearDisplay() {
+            display.textContent = '0';
+        }
+
+        function backspace() {
+            if (display.textContent.length > 1 && display.textContent !== 'Error') {
+                display.textContent = display.textContent.slice(0, -1);
+            } else {
+                display.textContent = '0';
+            }
+        }
+
+        function calculate() {
+            try {
+                const result = eval(display.textContent.replace('×', '*').replace('÷', '/'));
+                display.textContent = (result !== undefined && !isNaN(result)) 
+                    ? parseFloat(result.toFixed(10)) 
+                    : 'Error';
+            } catch {
+                display.textContent = 'Error';
+            }
+        }
+    </script>
 </body>
+</html>
