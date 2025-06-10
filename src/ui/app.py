@@ -3,7 +3,7 @@ import asyncio
 import logging
 import sys
 import os
-import traceback
+import traceback as tb_module
 from pathlib import Path
 
 # Configure logging
@@ -21,7 +21,7 @@ try:
 except ImportError as e:
     MULTI_AGENT_AVAILABLE = False
     print(f"❌ Failed to import multi_agent: {e}")
-    traceback.print_exc()
+    tb_module.print_exc()
 
 def display_chat_history(chat_history):
     """Display chat history with improved formatting."""
@@ -529,8 +529,7 @@ def main():
                                 st.error(f"❌ No HTML code returned: {result_message}")
                                 
                         except Exception as e:
-                            import traceback
-                            error_details = traceback.format_exc()
+                            error_details = tb_module.format_exc()
                             st.error(f"❌ Deployment error: {str(e)}")
                             
                             with st.expander("🔍 **Full Error Details**", expanded=False):
@@ -830,7 +829,7 @@ def main():
                         "message": f"Error occurred: {str(e)}"
                     })
                     logging.error(f"Multi-agent error: {e}")
-                    traceback.print_exc()
+                    tb_module.print_exc()
             
             st.session_state.multi_agent_processing = False
             st.rerun()
@@ -839,7 +838,7 @@ def main():
             st.session_state.multi_agent_processing = False
             st.error(f"❌ An error occurred: {str(e)}")
             logging.error(f"Form submission error: {e}")
-            traceback.print_exc()
+            tb_module.print_exc()
     
     # Footer
     st.markdown("---")

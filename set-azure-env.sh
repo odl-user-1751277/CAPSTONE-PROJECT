@@ -6,8 +6,8 @@
 set -e  # Exit on any error
 
 # Configuration - UPDATE THESE VALUES
-AZURE_APP_NAME="streamlit-multi-agent"  # Replace with your actual Azure Container App name
-AZURE_RESOURCE_GROUP="multi-agent-rg"   # Replace with your actual resource group name
+AZURE_APP_NAME="dev-ui-wiqsod2wb3qek"  # Replace with your actual Azure Container App name
+AZURE_RESOURCE_GROUP="CapstoneEnv"   # Replace with your actual resource group name
 
 # Colors for output
 RED='\033[0;31m'
