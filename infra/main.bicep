@@ -14,6 +14,19 @@ param resourceGroupName string
 param prefix string = 'dev'
 param uiAppExists bool = false
 
+// Environment variables for the application
+@secure()
+param azureOpenAiApiKey string
+param azureOpenAiEndpoint string
+param azureOpenAiDeploymentName string = 'gpt-4o'
+param azureOpenAiApiVersion string = '2024-11-20'
+param githubRepoUrl string
+@secure()
+param githubPat string
+param gitUserEmail string
+param githubUsername string
+param simulationMode string = 'false'
+
 var tags = {
   'azd-env-name': environmentName
 }
@@ -39,6 +52,16 @@ module aca './aca.bicep' = {
     containerRegistry: acrModule.outputs.acrName
     location: location
     uiAppExists: uiAppExists
+    azureOpenAiApiKey: azureOpenAiApiKey
+    azureOpenAiEndpoint: azureOpenAiEndpoint
+    azureOpenAiDeploymentName: azureOpenAiDeploymentName
+    azureOpenAiApiVersion: azureOpenAiApiVersion
+    githubRepoUrl: githubRepoUrl
+    githubPat: githubPat
+    gitUserEmail: gitUserEmail
+    githubUsername: githubUsername
+    simulationMode: simulationMode
+    tags: tags
   }
 }
 

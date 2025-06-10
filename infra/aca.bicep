@@ -6,6 +6,20 @@ param uiAppExists bool
 param emptyContainerImage string = 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
 param userAssignedIdentityName string = '${prefix}-ui-identity-${uniqueId}'
 
+// Environment variables for the application
+@secure()
+param azureOpenAiApiKey string
+param azureOpenAiEndpoint string
+param azureOpenAiDeploymentName string
+param azureOpenAiApiVersion string
+param githubRepoUrl string
+@secure()
+param githubPat string
+param gitUserEmail string
+param githubUsername string
+param simulationMode string
+param tags object
+
 resource containerAppEnv 'Microsoft.App/managedEnvironments@2023-11-02-preview' = {
   name: '${prefix}-containerAppEnv-${uniqueId}'
   location: location
@@ -42,9 +56,9 @@ resource acrPullRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-
 resource uiContainerApp 'Microsoft.App/containerApps@2023-11-02-preview' = {
   name: '${prefix}-ui-${uniqueId}'
   location: location
-  tags: {
+  tags: union(tags, {
     'azd-service-name': 'ui'
-  }
+  })
   identity: {
     type: 'UserAssigned'
     userAssignedIdentities: {
@@ -79,6 +93,56 @@ resource uiContainerApp 'Microsoft.App/containerApps@2023-11-02-preview' = {
             cpu: 1
             memory: '2Gi'
           }
+          env: [
+            {
+              name: 'AI_SERVICE'
+              value: 'azure'
+            }
+            {
+              name: 'GLOBAL_LLM_SERVICE'
+              value: 'AzureOpenAI'
+            }
+            {
+              name: 'AZURE_OPENAI_CHAT_DEPLOYMENT_NAME'
+              value: azureOpenAiDeploymentName
+            }
+            {
+              name: 'AZURE_OPENAI_DEPLOYMENT_NAME'
+              value: azureOpenAiDeploymentName
+            }
+            {
+              name: 'AZURE_OPENAI_ENDPOINT'
+              value: azureOpenAiEndpoint
+            }
+            {
+              name: 'AZURE_OPENAI_API_KEY'
+              value: azureOpenAiApiKey
+            }
+            {
+              name: 'AZURE_OPENAI_API_VERSION'
+              value: azureOpenAiApiVersion
+            }
+            {
+              name: 'GITHUB_REPO_URL'
+              value: githubRepoUrl
+            }
+            {
+              name: 'GITHUB_PAT'
+              value: githubPat
+            }
+            {
+              name: 'GIT_USER_EMAIL'
+              value: gitUserEmail
+            }
+            {
+              name: 'GITHUB_USERNAME'
+              value: githubUsername
+            }
+            {
+              name: 'SIMULATION_MODE'
+              value: simulationMode
+            }
+          ]
         }
       ]
     }

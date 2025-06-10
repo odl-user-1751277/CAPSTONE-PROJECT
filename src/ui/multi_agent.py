@@ -594,65 +594,168 @@ async def execute_git_push():
 # --- Alternative function using the shell script ---
 async def execute_git_push_with_script():
     """Execute Git push using the shell script in either allowed location."""
-    if PUSH_SCRIPT is None:
-        print(f"❌ No push_to_github.sh found in root or src/ui!")
+    try:
+        print("=" * 50)
+        print("🔍 DEBUG: Starting GitHub push process...")
+        print("=" * 50)
+        
+        # Check script availability
+        if PUSH_SCRIPT is None:
+            print(f"❌ No push_to_github.sh found in root or src/ui!")
+            print(f"📂 PROJECT_ROOT: {PROJECT_ROOT}")
+            print(f"📂 SCRIPT_IN_ROOT exists: {SCRIPT_IN_ROOT.exists() if SCRIPT_IN_ROOT else 'N/A'}")
+            print(f"📂 SCRIPT_IN_UI exists: {SCRIPT_IN_UI.exists() if SCRIPT_IN_UI else 'N/A'}")
+            return False
+        
+        print(f"✅ Found push script: {PUSH_SCRIPT}")
+        
+        # Environment variable debugging
+        print("\n🔍 Environment Variables:")
+        env_vars = ['GITHUB_PAT', 'GITHUB_USERNAME', 'GITHUB_REPO_URL', 'PATH']
+        for var in env_vars:
+            value = os.getenv(var)
+            if var == 'GITHUB_PAT' and value:
+                print(f"🔐 {var}: {'*' * len(value[:4])}***{value[-4:] if len(value) > 8 else '***'} (masked)")
+            elif value:
+                print(f"📋 {var}: {value[:100]}{'...' if len(value) > 100 else ''}")
+            else:
+                print(f"❌ {var}: NOT SET")
+        
+        # Check if we're in Azure (common Azure environment variables)
+        azure_indicators = ['WEBSITE_SITE_NAME', 'WEBSITE_RESOURCE_GROUP', 'APPSETTING_WEBSITE_SITE_NAME']
+        in_azure = any(os.getenv(var) for var in azure_indicators)
+        print(f"\n🌐 Running in Azure: {in_azure}")
+        if in_azure:
+            print("   Azure environment detected - using Azure-compatible Git operations")
+            
+            # Check for Azure App Service environment variables
+            azure_env_vars = [
+                'AZURE_OPENAI_API_KEY', 'AZURE_OPENAI_ENDPOINT', 'AZURE_OPENAI_DEPLOYMENT_NAME',
+                'GITHUB_PAT', 'GITHUB_USERNAME', 'GITHUB_REPO_URL', 'GIT_USER_EMAIL'
+            ]
+            print("\n🔍 Azure Environment Variables Check:")
+            missing_vars = []
+            for var in azure_env_vars:
+                value = os.getenv(var)
+                if value:
+                    if 'KEY' in var or 'PAT' in var:
+                        print(f"   ✅ {var}: [PRESENT - masked]")
+                    else:
+                        print(f"   ✅ {var}: {value}")
+                else:
+                    print(f"   ❌ {var}: MISSING")
+                    missing_vars.append(var)
+            
+            if missing_vars:
+                print(f"\n⚠️ WARNING: Missing {len(missing_vars)} required environment variables in Azure:")
+                for var in missing_vars:
+                    print(f"   - {var}")
+                print("\n💡 These should be set as Azure App Service environment variables,")
+                print("   not just in the .env file (which only works locally).")
+                print("   Use Azure CLI: az webapp config appsettings set --name <app-name> --resource-group <rg> --settings VAR=value")
+        else:
+            print("   Local environment detected - using .env file")
+
+        def find_git_bash():
+            # Hardcoded known Git Bash locations
+            possible_paths = [
+                shutil.which("bash"),  # whatever's in PATH first
+                r"C:\Program Files\Git\bin\bash.exe",
+                r"C:\Program Files (x86)\Git\bin\bash.exe"
+            ]
+            
+            print(f"\n🔍 Searching for Git Bash...")
+            for i, path in enumerate(possible_paths):
+                print(f"   {i+1}. Checking: {path}")
+                if path and os.path.exists(path):
+                    print(f"      ✅ EXISTS")
+                    if "Git" in path:
+                        print(f"      ✅ Contains 'Git' - SELECTED")
+                        return path
+                else:
+                    print(f"      ❌ NOT FOUND")
+            
+            # Last resort: try any that exists
+            for path in possible_paths:
+                if path and os.path.exists(path):
+                    print(f"   🔄 Fallback selection: {path}")
+                    return path
+            return None
+
+        git_bash = find_git_bash()
+        print(f"\n🔧 Git Bash resolved: {git_bash}")
+        
+        if not git_bash:
+            print("❌ Could not find Git Bash! Trying alternative approaches...")
+            
+            # Try using sh if available (Linux/Azure)
+            sh_path = shutil.which("sh")
+            if sh_path:
+                print(f"🔄 Found 'sh' instead: {sh_path}")
+                git_bash = sh_path
+            else:
+                print("❌ No shell executable found!")
+                return False
+
+        # Check script permissions and content
+        print(f"\n📋 Script Details:")
+        print(f"   Path: {PUSH_SCRIPT}")
+        print(f"   Exists: {PUSH_SCRIPT.exists()}")
+        print(f"   Size: {PUSH_SCRIPT.stat().st_size if PUSH_SCRIPT.exists() else 'N/A'} bytes")
+        print(f"   Readable: {os.access(PUSH_SCRIPT, os.R_OK) if PUSH_SCRIPT.exists() else 'N/A'}")
+        
+        # Show first few lines of script for debugging
+        if PUSH_SCRIPT.exists():
+            try:
+                with open(PUSH_SCRIPT, 'r', encoding='utf-8') as f:
+                    first_lines = [f.readline().strip() for _ in range(5)]
+                print(f"   First 5 lines:")
+                for i, line in enumerate(first_lines, 1):
+                    if line:
+                        print(f"      {i}: {line}")
+            except Exception as e:
+                print(f"   ❌ Could not read script: {e}")
+
+        print(f"\n🚀 Executing push script...")
+        print(f"   Command: {git_bash} {PUSH_SCRIPT}")
+        print(f"   Working directory: {PUSH_SCRIPT.parent}")
+        
+        result = subprocess.run(
+            [git_bash, str(PUSH_SCRIPT)],
+            capture_output=True,
+            text=True,
+            cwd=str(PUSH_SCRIPT.parent),
+            encoding="utf-8",
+            errors="replace",
+            timeout=300  # 5 minute timeout
+        )
+
+        print(f"\n📤 Script execution completed:")
+        print(f"   Return code: {result.returncode}")
+        print(f"   Stdout length: {len(result.stdout)} chars")
+        print(f"   Stderr length: {len(result.stderr)} chars")
+        
+        if result.stdout:
+            print(f"\n📝 Script Output:")
+            print(result.stdout)
+        if result.stderr:
+            print(f"\n⚠️ Script Errors:")
+            print(result.stderr)
+
+        success = result.returncode == 0
+        print(f"\n{'✅' if success else '❌'} GitHub push {'succeeded' if success else 'failed'}")
+        print("=" * 50)
+        
+        return success
+        
+    except subprocess.TimeoutExpired:
+        print("❌ Script execution timed out (5 minutes)")
         return False
-
-    def find_git_bash():
-        # Hardcoded known Git Bash locations
-        possible_paths = [
-            shutil.which("bash"),  # whatever's in PATH first
-            r"C:\Program Files\Git\bin\bash.exe",
-            r"C:\Program Files (x86)\Git\bin\bash.exe"
-        ]
-        # Return the first one that both exists AND contains 'Git' in the path (extra check)
-        for b in possible_paths:
-            if b and os.path.exists(b) and "Git" in b:
-                return b
-        # Last resort: try any that exists (maybe user changed install path)
-        for b in possible_paths:
-            if b and os.path.exists(b):
-                return b
-        return None
-
-    git_bash = find_git_bash()
-    print("GIT BASH resolved at:", git_bash)
-    if not git_bash:
-        print("❌ Could not find Git Bash! Please check your PATH or install location.")
+    except Exception as e:
+        print(f"❌ Exception during script execution: {e}")
+        import traceback
+        traceback.print_exc()
         return False
-
-    # print(">>> Root at:", PROJECT_ROOT)
-    # print("Root script at:", SCRIPT_IN_ROOT)
-    # print("UI script at:", SCRIPT_IN_UI)
-    # print("Root script exists:", SCRIPT_IN_ROOT.exists())
-    # print("UI script exists:", SCRIPT_IN_UI.exists())
-
-    print(f"🚀 Executing push script: {PUSH_SCRIPT}")
-    
-    # Debug: Show if GitHub PAT is available for Azure authentication
-    github_pat = os.getenv("GITHUB_PAT")
-    github_username = os.getenv("GITHUB_USERNAME")
-    if github_pat and github_username:
-        print(f"🔐 GitHub PAT authentication available for user: {github_username}")
-    else:
-        print("⚠️ No GitHub PAT found - using existing Git credentials")
-
-    result = subprocess.run(
-        [git_bash, str(PUSH_SCRIPT)],
-        capture_output=True,
-        text=True,
-        cwd=str(PUSH_SCRIPT.parent),
-        encoding="utf-8",
-        errors="replace"
-    )
-
-    print(f"📤 Script completed with return code: {result.returncode}")
-    if result.stdout:
-        print(f"📝 Script output:\n{result.stdout}")
-    if result.stderr:
-        print(f"⚠️ Script errors:\n{result.stderr}")
-
-    return result.returncode == 0
 
     # Enhanced Multi-Agent Workflow ---
 async def run_multi_agent(user_input: str, streamlit_mode=False):
@@ -888,39 +991,70 @@ async def run_multi_agent(user_input: str, streamlit_mode=False):
 
 async def handle_approval(chat_history, user_decision="APPROVED"):
     """Handle the approval process after user explicitly types 'APPROVED'."""
-    # Fix NoneType error - ensure user_decision is not None
-    if user_decision is None:
-        user_decision = "APPROVED"
-    
-    # SECURITY CHECK: Must be exactly "APPROVED"
-    if user_decision.upper() != "APPROVED":
-        print(f"❌ Security check failed: User provided '{user_decision}' instead of 'APPROVED'")
-        print("❌ Solution not approved. Exiting without saving.")
-        return None, f"❌ Solution not approved. User typed '{user_decision}' instead of 'APPROVED'."
-    
-    print("✅ User explicitly approved with 'APPROVED'! Processing...")
-    
-    # Extract HTML code from SoftwareEngineer messages
-    html_code = None
-    for message in chat_history:
-        if getattr(message, 'name', None) == "SoftwareEngineer":
-            extracted_html = _extract_html(message.content)
-            if extracted_html and len(extracted_html) > 50:
-                html_code = extracted_html
-                break
-                
-    if html_code:
-        # Always save HTML locally first
-        HTML_OUTPUT_FILE.write_text(html_code, encoding="utf-8")
-        print(f"💾 Saved HTML to: {HTML_OUTPUT_FILE.resolve()}")
+    try:
+        print("=" * 60)
+        print("🔍 DEBUG: Starting approval process...")
+        print("=" * 60)
         
-        print("🚀 Pushing to GitHub...")
+        # Fix NoneType error - ensure user_decision is not None
+        if user_decision is None:
+            user_decision = "APPROVED"
+        
+        print(f"📋 User decision: '{user_decision}'")
+        print(f"📋 Chat history length: {len(chat_history) if chat_history else 0}")
+        
+        # SECURITY CHECK: Must be exactly "APPROVED"
+        if user_decision.upper() != "APPROVED":
+            print(f"❌ Security check failed: User provided '{user_decision}' instead of 'APPROVED'")
+            print("❌ Solution not approved. Exiting without saving.")
+            return None, f"❌ Solution not approved. User typed '{user_decision}' instead of 'APPROVED'."
+        
+        print("✅ User explicitly approved with 'APPROVED'! Processing...")
+        
+        # Extract HTML code from SoftwareEngineer messages
+        html_code = None
+        print("\n🔍 Searching for HTML code in chat history...")
+        
+        for i, message in enumerate(chat_history):
+            message_name = getattr(message, 'name', 'Unknown')
+            message_content = getattr(message, 'content', '')
+            print(f"   Message {i+1}: {message_name} ({len(message_content)} chars)")
+            
+            if message_name == "SoftwareEngineer":
+                extracted_html = _extract_html(message_content)
+                print(f"      Extracted HTML: {len(extracted_html) if extracted_html else 0} chars")
+                if extracted_html and len(extracted_html) > 50:
+                    html_code = extracted_html
+                    print(f"      ✅ Valid HTML found! Length: {len(html_code)}")
+                    break
+                    
+        if not html_code:
+            print("❌ No valid HTML code found in chat history")
+            return None, "❌ No valid HTML code found."
+        
+        print(f"\n💾 Saving HTML locally to: {HTML_OUTPUT_FILE.resolve()}")
+        
+        # Always save HTML locally first
+        try:
+            HTML_OUTPUT_FILE.write_text(html_code, encoding="utf-8")
+            print(f"✅ HTML saved successfully ({len(html_code)} characters)")
+        except Exception as e:
+            print(f"❌ Failed to save HTML locally: {e}")
+            return None, f"❌ Failed to save HTML file: {e}"
+        
+        print("\n🚀 Starting GitHub push process...")
         push_success = await execute_git_push_with_script()
+        print(f"📤 GitHub push result: {'SUCCESS' if push_success else 'FAILED'}")
         
         # Generate GitHub URLs: Pages URL (for live app), file URL (for source code), and raw URL (for download)
+        print("\n🔗 Generating GitHub URLs...")
         github_pages_url = generate_github_pages_url("index.html", "main")
         github_file_url = generate_github_file_url("index.html", "main")
         github_raw_url = generate_github_raw_url("index.html", "main")
+        
+        print(f"   Pages URL: {github_pages_url}")
+        print(f"   File URL: {github_file_url}")
+        print(f"   Raw URL: {github_raw_url}")
         
         # Show results in terminal
         print("=" * 60)
@@ -951,9 +1085,17 @@ async def handle_approval(chat_history, user_decision="APPROVED"):
             result_message += f"📁 Local file: {HTML_OUTPUT_FILE.resolve()}\n"
         result_message += f"📊 File size: {len(html_code)} characters"
         
+        print(f"\n📋 Returning result message ({len(result_message)} chars)")
+        print("✅ Approval process completed successfully")
+        
         return html_code, result_message
-    else:
-        return None, "❌ No valid HTML code found."    
+        
+    except Exception as e:
+        error_msg = f"❌ Exception in handle_approval: {e}"
+        print(error_msg)
+        import traceback
+        traceback.print_exc()
+        return None, error_msg    
 
 # --- Main execution ---
 async def main():

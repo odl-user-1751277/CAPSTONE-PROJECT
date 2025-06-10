@@ -31,6 +31,33 @@
     },
     "uiAppExists": {
       "value": "${SERVICE_UI_RESOURCE_EXISTS=false}"
+    },
+    "azureOpenAiApiKey": {
+      "value": "${AZURE_OPENAI_API_KEY}"
+    },
+    "azureOpenAiEndpoint": {
+      "value": "${AZURE_OPENAI_ENDPOINT}"
+    },
+    "azureOpenAiDeploymentName": {
+      "value": "${AZURE_OPENAI_DEPLOYMENT_NAME=gpt-4o}"
+    },
+    "azureOpenAiApiVersion": {
+      "value": "${AZURE_OPENAI_API_VERSION=2024-11-20}"
+    },
+    "githubRepoUrl": {
+      "value": "${GITHUB_REPO_URL}"
+    },
+    "githubPat": {
+      "value": "${GITHUB_PAT}"
+    },
+    "gitUserEmail": {
+      "value": "${GIT_USER_EMAIL}"
+    },
+    "githubUsername": {
+      "value": "${GITHUB_USERNAME}"
+    },
+    "simulationMode": {
+      "value": "${SIMULATION_MODE=false}"
     }
   }
 }

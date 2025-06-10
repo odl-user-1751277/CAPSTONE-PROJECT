@@ -445,11 +445,44 @@ def main():
                 if approval_text.strip().upper() == "APPROVED":
                     with st.spinner("🚀 Deploying to GitHub..."):
                         st.info(f"✅ User typed '{approval_text.strip()}' - Proceeding with deployment...")
+                        
+                        # Enhanced debugging section
+                        with st.expander("🔍 **Debug Information**", expanded=True):
+                            st.write("📋 **Environment Check:**")
+                            import os
+                            env_vars = ['GITHUB_PAT', 'GITHUB_USERNAME', 'GITHUB_REPO_URL']
+                            for var in env_vars:
+                                value = os.getenv(var)
+                                if var == 'GITHUB_PAT' and value:
+                                    st.write(f"   🔐 {var}: {'*' * 8}...{value[-4:]} (masked)")
+                                elif value:
+                                    st.write(f"   ✅ {var}: {value}")
+                                else:
+                                    st.write(f"   ❌ {var}: NOT SET")
+                            
+                            # Check if running in Azure
+                            azure_indicators = ['WEBSITE_SITE_NAME', 'WEBSITE_RESOURCE_GROUP', 'APPSETTING_WEBSITE_SITE_NAME']
+                            in_azure = any(os.getenv(var) for var in azure_indicators)
+                            st.write(f"   🌐 Running in Azure: {in_azure}")
+                            
+                            st.write(f"\n📋 **Session State:**")
+                            st.write(f"   Chat history length: {len(st.session_state.approval_data) if st.session_state.approval_data else 0}")
+                            st.write(f"   Awaiting approval: {st.session_state.awaiting_approval}")
+                            st.write(f"   Has deployment result: {st.session_state.deployment_result is not None}")
+                        
                         try:
                             from multi_agent import handle_approval
+                            
+                            st.write("🔍 **Starting approval process...**")
+                            
                             html_code, result_message = asyncio.run(
                                 handle_approval(st.session_state.approval_data, approval_text.strip())
                             )
+                            
+                            st.write("🔍 **Approval process completed:**")
+                            st.write(f"   HTML code length: {len(html_code) if html_code else 0}")
+                            st.write(f"   Result message length: {len(result_message) if result_message else 0}")
+                            st.write(f"   Result preview: {result_message[:200]}{'...' if len(result_message or '') > 200 else ''}")
                             
                             if html_code:
                                 # Store deployment result for persistent display
@@ -485,16 +518,32 @@ def main():
                                 if repo_url:
                                     deployment_data["repo_url"] = repo_url
                                 
+                                st.write("🔍 **Storing deployment result:**")
+                                st.write(f"   Keys: {list(deployment_data.keys())}")
+                                st.write(f"   GitHub link: {deployment_data.get('github_link', 'Not found')}")
+                                st.write(f"   Repo URL: {deployment_data.get('repo_url', 'Not found')}")
+                                
                                 st.session_state.deployment_result = deployment_data
                                 st.success("🎉 **DEPLOYMENT SUCCESSFUL!** Check above for details.")
                             else:
-                                st.error(result_message)
+                                st.error(f"❌ No HTML code returned: {result_message}")
                                 
                         except Exception as e:
+                            import traceback
+                            error_details = traceback.format_exc()
                             st.error(f"❌ Deployment error: {str(e)}")
+                            
+                            with st.expander("🔍 **Full Error Details**", expanded=False):
+                                st.code(error_details)
                             
                         st.session_state.awaiting_approval = False
                         st.session_state.approval_data = None
+                        
+                        st.write("🔍 **Session state after approval:**")
+                        st.write(f"   deployment_result exists: {st.session_state.deployment_result is not None}")
+                        st.write(f"   awaiting_approval: {st.session_state.awaiting_approval}")
+                        
+                        st.write("🔄 **Rerunning Streamlit...**")
                         st.rerun()
                 else:
                     # Any input other than "APPROVED" is treated as rejection
