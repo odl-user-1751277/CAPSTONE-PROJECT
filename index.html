@@ -3,64 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculator App</title>
+    <title>Responsive Calculator</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            background: #f4f4f4;
+            height: 100vh;
         }
+
         .calculator {
-            background: #ffffff;
-            width: 300px;
+            background-color: #ffffff;
             border-radius: 10px;
+            width: 100%;
+            max-width: 400px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            overflow: hidden;
         }
+
         .display {
-            background: #222;
-            color: #0f0;
             font-size: 2rem;
-            text-align: right;
             padding: 20px;
-            height: 60px;
-            overflow: hidden;
+            text-align: right;
+            background-color: #222831;
+            color: #ffffff;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            overflow-x: auto;
         }
+
         .buttons {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 1px;
         }
-        .button {
-            padding: 20px;
+
+        button {
+            border: none;
+            outline: none;
+            background-color: #393e46;
+            color: #ffffff;
             font-size: 1.2rem;
-            text-align: center;
-            background: #ddd;
-            border: 1px solid #ccc;
+            padding: 20px;
             cursor: pointer;
-            transition: background 0.2s, transform 0.2s;
+            transition: background-color 0.3s;
         }
-        .button:active {
-            transform: scale(0.95);
-            background: #bbb;
+
+        button:hover {
+            background-color: #222831;
         }
-        .button.operator {
-            background: #f0a500;
-            color: #fff;
+
+        button.operator {
+            background-color: #00adb5;
+            color: #ffffff;
         }
-        .button.operator:active {
-            background: #c07800;
+
+        button.operator:hover {
+            background-color: #007f82;
         }
-        .button.clear {
-            background: #ff4c4c;
-            color: #fff;
+
+        button.equal {
+            background-color: #ff5722;
+            color: #ffffff;
+            grid-column: 4 / -1;
         }
-        .button.clear:active {
-            background: #cc0000;
+
+        button.equal:hover {
+            background-color: #e64a19;
         }
     </style>
 </head>
@@ -68,108 +83,64 @@
     <div class="calculator">
         <div class="display" id="display">0</div>
         <div class="buttons">
-            <div class="button clear" id="clear">C</div>
-            <div class="button operator" data-operation="sqrt">√</div>
-            <div class="button operator" data-operation="%">%</div>
-            <div class="button operator" data-operation="/">÷</div>
-            <div class="button" data-number="7">7</div>
-            <div class="button" data-number="8">8</div>
-            <div class="button" data-number="9">9</div>
-            <div class="button operator" data-operation="*">×</div>
-            <div class="button" data-number="4">4</div>
-            <div class="button" data-number="5">5</div>
-            <div class="button" data-number="6">6</div>
-            <div class="button operator" data-operation="-">−</div>
-            <div class="button" data-number="1">1</div>
-            <div class="button" data-number="2">2</div>
-            <div class="button" data-number="3">3</div>
-            <div class="button operator" data-operation="+">+</div>
-            <div class="button" data-number="0" style="grid-column: span 2;">0</div>
-            <div class="button" data-number=".">.</div>
-            <div class="button operator" data-operation="=">=</div>
+            <button onclick="handleInput('7')">7</button>
+            <button onclick="handleInput('8')">8</button>
+            <button onclick="handleInput('9')">9</button>
+            <button class="operator" onclick="handleOperator('/')">÷</button>
+            <button onclick="handleInput('4')">4</button>
+            <button onclick="handleInput('5')">5</button>
+            <button onclick="handleInput('6')">6</button>
+            <button class="operator" onclick="handleOperator('*')">×</button>
+            <button onclick="handleInput('1')">1</button>
+            <button onclick="handleInput('2')">2</button>
+            <button onclick="handleInput('3')">3</button>
+            <button class="operator" onclick="handleOperator('-')">-</button>
+            <button onclick="handleInput('0')">0</button>
+            <button onclick="handleInput('.')">.</button>
+            <button class="operator" onclick="handleOperator('+')">+</button>
+            <button class="equal" onclick="calculateResult()">=</button>
+            <button onclick="clearDisplay()">C</button>
         </div>
     </div>
-
     <script>
-        const display = document.getElementById('display');
-        let currentOperand = '';
-        let previousOperand = '';
-        let operator = '';
+        let display = document.getElementById('display');
+        let expression = '';
 
-        // Function to update the display
-        function updateDisplay() {
-            display.textContent = currentOperand || '0';
-        }
-
-        // Handle button clicks
-        document.querySelectorAll('.button').forEach(button => {
-            button.addEventListener('click', () => {
-                const number = button.dataset.number;
-                const operation = button.dataset.operation;
-
-                if (number) {
-                    if (number === '.' && currentOperand.includes('.')) return;
-                    currentOperand += number;
-                } else if (operation) {
-                    if (operation === '=') {
-                        if (previousOperand && operator) {
-                            calculate();
-                        }
-                    } else if (operation === 'C') {
-                        clearAll();
-                    } else if (operation === 'sqrt') {
-                        currentOperand = Math.sqrt(parseFloat(currentOperand)) || '0';
-                    } else {
-                        if (currentOperand) {
-                            if (previousOperand && operator) {
-                                calculate();
-                            }
-                            operator = operation;
-                            previousOperand = currentOperand;
-                            currentOperand = '';
-                        }
-                    }
-                }
-
-                updateDisplay();
-            });
-        });
-
-        // Clear all input
-        function clearAll() {
-            currentOperand = '';
-            previousOperand = '';
-            operator = '';
+        function handleInput(value) {
+            if (expression === '0') {
+                expression = value; // Replace leading 0
+            } else {
+                expression += value;
+            }
             updateDisplay();
         }
 
-        // Perform calculation
-        function calculate() {
-            const prev = parseFloat(previousOperand);
-            const curr = parseFloat(currentOperand);
-            if (isNaN(prev) || isNaN(curr)) return;
-
-            switch (operator) {
-                case '+':
-                    currentOperand = (prev + curr).toString();
-                    break;
-                case '-':
-                    currentOperand = (prev - curr).toString();
-                    break;
-                case '*':
-                    currentOperand = (prev * curr).toString();
-                    break;
-                case '/':
-                    currentOperand = curr === 0 ? 'Error' : (prev / curr).toString();
-                    break;
-                case '%':
-                    currentOperand = (prev % curr).toString();
-                    break;
-                default:
-                    return;
+        function handleOperator(operator) {
+            const lastChar = expression[expression.length - 1];
+            if (!['+', '-', '*', '/'].includes(lastChar)) {
+                expression += operator;
             }
-            previousOperand = '';
-            operator = '';
+            updateDisplay();
+        }
+
+        function clearDisplay() {
+            expression = '';
+            display.textContent = '0';
+        }
+
+        function calculateResult() {
+            try {
+                const result = eval(expression);
+                expression = result.toString();
+                updateDisplay();
+            } catch {
+                display.textContent = 'Error';
+                expression = '';
+            }
+        }
+
+        function updateDisplay() {
+            display.textContent = expression || '0';
         }
     </script>
 </body>
