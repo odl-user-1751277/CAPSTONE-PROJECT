@@ -3,144 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Responsive Calculator</title>
+    <title>Calculator App</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
+            background-color: #f3f3f3;
+            padding: 20px;
         }
-
         .calculator {
-            background-color: #ffffff;
-            border-radius: 10px;
             width: 100%;
             max-width: 400px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        .display {
-            font-size: 2rem;
+            background-color: #ffffff;
             padding: 20px;
-            text-align: right;
-            background-color: #222831;
-            color: #ffffff;
-            border-top-left-radius: 10px;
-            border-top-right-radius: 10px;
-            overflow-x: auto;
+            border-radius: 16px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
-
+        .display {
+            width: 100%;
+            background-color: #f7f7f7;
+            font-size: 2rem;
+            text-align: right;
+            margin-bottom: 20px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
         .buttons {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
         }
-
         button {
-            border: none;
-            outline: none;
-            background-color: #393e46;
-            color: #ffffff;
             font-size: 1.2rem;
-            padding: 20px;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            background-color: #e0e0e0;
+            color: #333;
         }
-
-        button:hover {
-            background-color: #222831;
-        }
-
-        button.operator {
-            background-color: #00adb5;
+        button.operation {
+            background-color: #f39c12;
             color: #ffffff;
         }
-
-        button.operator:hover {
-            background-color: #007f82;
-        }
-
-        button.equal {
-            background-color: #ff5722;
+        button.equals {
+            background-color: #27ae60;
             color: #ffffff;
-            grid-column: 4 / -1;
         }
-
-        button.equal:hover {
-            background-color: #e64a19;
+        button:active {
+            transform: scale(0.98);
+        }
+        @media (max-width: 480px) {
+            .display {
+                font-size: 1.5rem;
+            }
+            button {
+                font-size: 1rem;
+                padding: 12px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="calculator">
-        <div class="display" id="display">0</div>
+        <div id="display" class="display">0</div>
         <div class="buttons">
-            <button onclick="handleInput('7')">7</button>
-            <button onclick="handleInput('8')">8</button>
-            <button onclick="handleInput('9')">9</button>
-            <button class="operator" onclick="handleOperator('/')">÷</button>
-            <button onclick="handleInput('4')">4</button>
-            <button onclick="handleInput('5')">5</button>
-            <button onclick="handleInput('6')">6</button>
-            <button class="operator" onclick="handleOperator('*')">×</button>
-            <button onclick="handleInput('1')">1</button>
-            <button onclick="handleInput('2')">2</button>
-            <button onclick="handleInput('3')">3</button>
-            <button class="operator" onclick="handleOperator('-')">-</button>
-            <button onclick="handleInput('0')">0</button>
-            <button onclick="handleInput('.')">.</button>
-            <button class="operator" onclick="handleOperator('+')">+</button>
-            <button class="equal" onclick="calculateResult()">=</button>
             <button onclick="clearDisplay()">C</button>
+            <button onclick="backspace()">←</button>
+            <button onclick="append('%')">%</button>
+            <button onclick="append('/')">÷</button>
+            <button onclick="append('7')">7</button>
+            <button onclick="append('8')">8</button>
+            <button onclick="append('9')">9</button>
+            <button onclick="append('*')">×</button>
+            <button onclick="append('4')">4</button>
+            <button onclick="append('5')">5</button>
+            <button onclick="append('6')">6</button>
+            <button onclick="append('-')">−</button>
+            <button onclick="append('1')">1</button>
+            <button onclick="append('2')">2</button>
+            <button onclick="append('3')">3</button>
+            <button onclick="append('+')">+</button>
+            <button onclick="append('0')">0</button>
+            <button onclick="append('.')">.</button>
+            <button class="equals" onclick="calculate()">=</button>
         </div>
     </div>
+
     <script>
-        let display = document.getElementById('display');
-        let expression = '';
-
-        function handleInput(value) {
-            if (expression === '0') {
-                expression = value; // Replace leading 0
-            } else {
-                expression += value;
-            }
-            updateDisplay();
-        }
-
-        function handleOperator(operator) {
-            const lastChar = expression[expression.length - 1];
-            if (!['+', '-', '*', '/'].includes(lastChar)) {
-                expression += operator;
-            }
-            updateDisplay();
-        }
+        const display = document.getElementById('display');
 
         function clearDisplay() {
-            expression = '';
-            display.textContent = '0';
+            display.innerText = '0';
         }
 
-        function calculateResult() {
-            try {
-                const result = eval(expression);
-                expression = result.toString();
-                updateDisplay();
-            } catch {
-                display.textContent = 'Error';
-                expression = '';
+        function backspace() {
+            display.innerText = display.innerText.slice(0, -1) || '0';
+        }
+
+        function append(value) {
+            if (display.innerText === '0' && value !== '.') {
+                display.innerText = value;
+            } else {
+                display.innerText += value;
             }
         }
 
-        function updateDisplay() {
-            display.textContent = expression || '0';
+        function calculate() {
+            try {
+                const result = eval(display.innerText.replace('×', '*').replace('÷', '/'));
+                display.innerText = Number.isFinite(result) ? result : 'Error';
+            } catch (error) {
+                display.innerText = 'Error';
+            }
         }
     </script>
 </body>
