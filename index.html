@@ -5,176 +5,160 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculator App</title>
     <style>
-        /* General Reset */
+        /* General styling for a clean, modern look */
         body {
-            margin: 0;
             font-family: Arial, sans-serif;
-            background-color: #f3f4f6;
+            margin: 0;
+            padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
+            background-color: #f4f4f4;
         }
 
-        #calculator {
+        .calculator {
             width: 320px;
-            background-color: #ffffff;
+            background: #fff;
             border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             overflow: hidden;
         }
 
-        #display {
-            height: 80px;
-            background-color: #212529;
-            color: #ffffff;
+        .calculator-display {
+            padding: 15px;
+            background: #323232;
+            color: #fff;
             text-align: right;
-            padding: 20px;
-            font-size: 1.5rem;
-            box-sizing: border-box;
+            font-size: 2rem;
+            height: 80px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            overflow: hidden;
+            word-wrap: break-word;
         }
 
-        .buttons {
+        .calculator-buttons {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 1px;
-            background-color: #ced4da;
+            background: #ddd;
         }
 
-        .button {
-            background-color: #ffffff;
-            border: none;
-            font-size: 1.2rem;
+        .btn {
             padding: 20px;
+            font-size: 1.4rem;
+            text-align: center;
+            border: none;
+            outline: none;
             cursor: pointer;
         }
 
-        .button:active {
-            background-color: #adb5bd;
+        .btn.operator {
+            background: #1e90ff;
+            color: white;
         }
 
-        .button.operator {
-            background-color: #ffa94d;
-            color: #ffffff;
+        .btn.clear {
+            background: #ff5252;
+            color: white;
         }
 
-        .button.operator:active {
-            background-color: #fd7e14;
+        .btn.equal {
+            background: #4caf50;
+            color: white;
         }
 
-        .button.equal {
-            background-color: #40c057;
-            color: #ffffff;
-            grid-column: span 2;
+        .btn:hover {
+            opacity: 0.9;
         }
 
-        .button.equal:active {
-            background-color: #37b24d;
-        }
+        @media (max-width: 400px) {
+            .calculator {
+                width: 100%;
+            }
 
-        .button.clear {
-            background-color: #e03131;
-            color: #ffffff;
-            grid-column: span 2;
-        }
-
-        .button.clear:active {
-            background-color: #c92a2a;
+            .btn {
+                font-size: 1.2rem;
+                padding: 15px;
+            }
         }
     </style>
 </head>
 <body>
-    <div id="calculator">
-        <div id="display">0</div>
-        <div class="buttons">
-            <button class="button clear" onclick="clearDisplay()">C</button>
-            <button class="button" onclick="appendValue('±')">±</button>
-            <button class="button" onclick="appendValue('%')">%</button>
-            <button class="button operator" onclick="setOperator('/')">÷</button>
-
-            <button class="button" onclick="appendValue('7')">7</button>
-            <button class="button" onclick="appendValue('8')">8</button>
-            <button class="button" onclick="appendValue('9')">9</button>
-            <button class="button operator" onclick="setOperator('*')">×</button>
-
-            <button class="button" onclick="appendValue('4')">4</button>
-            <button class="button" onclick="appendValue('5')">5</button>
-            <button class="button" onclick="appendValue('6')">6</button>
-            <button class="button operator" onclick="setOperator('-')">−</button>
-
-            <button class="button" onclick="appendValue('1')">1</button>
-            <button class="button" onclick="appendValue('2')">2</button>
-            <button class="button" onclick="appendValue('3')">3</button>
-            <button class="button operator" onclick="setOperator('+')">+</button>
-
-            <button class="button" onclick="appendValue('0')" style="grid-column: span 2;">0</button>
-            <button class="button" onclick="appendValue('.')">.</button>
-            <button class="button equal" onclick="calculateResult()">=</button>
+    <div class="calculator">
+        <div class="calculator-display" id="display">0</div>
+        <div class="calculator-buttons">
+            <button class="btn clear" onclick="clearDisplay()">C</button>
+            <button class="btn" onclick="deleteLast()">⌫</button>
+            <button class="btn operator" onclick="appendOperator('/')">÷</button>
+            <button class="btn operator" onclick="appendOperator('*')">×</button>
+            <button class="btn" onclick="appendNumber('7')">7</button>
+            <button class="btn" onclick="appendNumber('8')">8</button>
+            <button class="btn" onclick="appendNumber('9')">9</button>
+            <button class="btn operator" onclick="appendOperator('-')">−</button>
+            <button class="btn" onclick="appendNumber('4')">4</button>
+            <button class="btn" onclick="appendNumber('5')">5</button>
+            <button class="btn" onclick="appendNumber('6')">6</button>
+            <button class="btn operator" onclick="appendOperator('+')">+</button>
+            <button class="btn" onclick="appendNumber('1')">1</button>
+            <button class="btn" onclick="appendNumber('2')">2</button>
+            <button class="btn" onclick="appendNumber('3')">3</button>
+            <button class="btn equal" onclick="calculate()">=</button>
+            <button class="btn" onclick="appendNumber('0')" style="grid-column: span 2">0</button>
+            <button class="btn" onclick="appendNumber('.')">.</button>
         </div>
     </div>
+
     <script>
-        let currentOperand = '';
-        let previousOperand = '';
-        let operator = null;
+        let display = document.getElementById('display');
+        let currentInput = '';
 
-        const displayElement = document.getElementById('display');
-
-        function updateDisplay() {
-            displayElement.textContent = currentOperand || '0';
+        function appendNumber(number) {
+            if (currentInput === '0' && number === '0') return; // Prevent 000...
+            if (currentInput === '0' && number !== '.') currentInput = ''; // Allow "0."
+            currentInput += number;
+            display.textContent = currentInput;
         }
 
-        function appendValue(value) {
-            if (value === '.' && currentOperand.includes('.')) return;
-            currentOperand += value;
-            updateDisplay();
-        }
-
-        function setOperator(op) {
-            if (currentOperand === '') return;
-            if (previousOperand !== '') {
-                calculateResult();
-            }
-            operator = op;
-            previousOperand = currentOperand;
-            currentOperand = '';
-        }
-
-        function calculateResult() {
-            if (operator === null || currentOperand === '' || previousOperand === '') return;
-            const prev = parseFloat(previousOperand);
-            const current = parseFloat(currentOperand);
-
-            if (isNaN(prev) || isNaN(current)) return;
-
-            let result;
-            switch (operator) {
-                case '+':
-                    result = prev + current;
-                    break;
-                case '-':
-                    result = prev - current;
-                    break;
-                case '*':
-                    result = prev * current;
-                    break;
-                case '/':
-                    result = current === 0 ? 'Error' : prev / current;
-                    break;
-                default:
-                    return;
-            }
-
-            currentOperand = result.toString();
-            operator = null;
-            previousOperand = '';
-            updateDisplay();
+        function appendOperator(operator) {
+            if (endsWithOperator(currentInput)) return; // Prevent duplicate operators
+            currentInput += ` ${operator} `;
+            display.textContent = currentInput;
         }
 
         function clearDisplay() {
-            currentOperand = '';
-            previousOperand = '';
-            operator = null;
-            updateDisplay();
+            currentInput = '';
+            display.textContent = '0';
+        }
+
+        function deleteLast() {
+            if (currentInput.length > 0) {
+                currentInput = currentInput.trimEnd();
+                if (currentInput.endsWith('+') || currentInput.endsWith('-') || currentInput.endsWith('*') || currentInput.endsWith('/')) {
+                    currentInput = currentInput.slice(0, -2); // Remove operator + space
+                } else {
+                    currentInput = currentInput.slice(0, -1); // Remove single character
+                }
+            }
+            display.textContent = currentInput || '0';
+        }
+
+        function calculate() {
+            try {
+                const formattedInput = currentInput.replace(/×/g, '*').replace(/÷/g, '/');
+                const result = eval(formattedInput);
+                currentInput = result.toString();
+                display.textContent = currentInput;
+            } catch (error) {
+                display.textContent = 'Error';
+                currentInput = '';
+            }
+        }
+
+        function endsWithOperator(input) {
+            return input && (input.endsWith('+') || input.endsWith('-') || input.endsWith('*') || input.endsWith('/'));
         }
     </script>
 </body>
